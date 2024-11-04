@@ -9,6 +9,52 @@ Before running the app, ensure you have the following installed:
 - Firebase account and Firebase project configured
 - `google-services.json` file added to the app’s `src/main` directory
 
+## Branching Strategy
+We will use a branching strategy to organize our work. The main branch will be `main`, and we will create feature branches for development.
+
+### Branch Naming Convention
+- **Main Branch**: `main`
+- **Feature Branches**: `feature/feature-name` (e.g., `feature/login-screen`)
+- **Bugfix Branches**: `bugfix/issue-description` (e.g., `bugfix/fix-login-error`)
+
+### Important Notes
+- Always pull the latest changes from the main branch before creating a new branch.
+- Use descriptive commit messages to make the history clear for everyone.
+- Communicate with your team about what features or fixes you are working on to avoid overlap.
+
+### Workflow
+1. **Create a Branch**: When starting work on a new feature or bugfix, create a new branch from `main`:
+   - Click on **Git** in the bottom toolbar, then select **Branches**.
+   - Choose **New Branch from 'main'**, name your branch (e.g., `feature/your-feature-name`), and ensure it is created from `main`.
+
+   Alternatively, you can use the command line:
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/your-feature-name
+   ```
+3. **Make Changes**: Develop your feature or fix in your branch.
+4. **Commit Changes**: Commit your changes with clear, descriptive messages:
+   - This can also be done using the IDE (Intellij and Android Studio)
+   
+   Or via command line:
+   ```bash
+   git add .
+   git commit -m "Add login screen UI"
+   ```
+5. **Push Your Branch**: Push your branch to the remote repository:
+   In IntelliJ IDEA, you can do this by:
+   Going to Git > Push or clicking the Push button in the toolbar.
+   
+   Alternatively, you can use the command line:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+6. **Create a Pull Request**: Once your work is ready, create a pull request (PR) to merge your branch into main. Ensure to request reviews from team members.
+   - This can be done directly in the IDE if integrated with a service like GitHub or GitLab:
+   - Use the Git menu or the GitHub tool window to create a PR and ensure to request reviews from team members.
+
+7. **Merge Changes**: After approvals and successful checks, merge your PR into the main branch.
 
 ## Setup
 
