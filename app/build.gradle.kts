@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "com.example.smartypaws"
-    compileSdk = 34
+    compileSdk = (project.findProperty("COMPILE_SDK_VERSION") as String).toInt()
 
     defaultConfig {
         applicationId = "com.example.smartypaws"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = (project.findProperty("MIN_SDK_VERSION") as String).toInt()
+        targetSdk = (project.findProperty("TARGET_SDK_VERSION") as String).toInt()
         versionCode = 1
         versionName = "1.0"
 
