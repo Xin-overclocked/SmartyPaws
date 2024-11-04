@@ -44,7 +44,7 @@ Ensure your environment is set up with:
 
 
 ## Project Structure
-
+```bash
 com.example.myapp
 │
 ├── data                 # Handles data operations (local/remote sources)
@@ -61,6 +61,7 @@ com.example.myapp
 │   └── viewmodels       # UI-related data management
 ├── utils                # Utility classes
 └── di                   # Dependency injection (Hilt/Dagger)
+```
 
 ## Features
 
