@@ -3,13 +3,7 @@ package com.example.smartypaws;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.MenuItem;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.smartypaws.databinding.ActivityMainBinding;
 import com.github.mikephil.charting.charts.BarChart;
