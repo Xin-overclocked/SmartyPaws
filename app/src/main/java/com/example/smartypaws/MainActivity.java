@@ -1,12 +1,18 @@
 package com.example.smartypaws;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView myFlashcardsRecyclerView;
     private FlashcardAdapter recentlyStudiedAdapter;
     private FlashcardAdapter myFlashcardsAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,22 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Handle FAB click (e.g., open a dialog to add a new flashcard)
             }
+        });
+
+        // Set up bottom navigation
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_profile) {
+                startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+//                    overrideActivityTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                return true;
+            }
+            if (item.getItemId() == R.id.nav_home) {
+                return true;
+            }
+            return false;
         });
     }
 }
