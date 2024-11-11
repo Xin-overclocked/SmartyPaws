@@ -28,7 +28,7 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        barChart = findViewById(R.id.barChart);
+        barChart = findViewById(R.id.bar_chart);
         fab = findViewById(R.id.fabAdd);
 
         setupBarChart();
@@ -63,7 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
         entries.add(new BarEntry(6f, 6f));
 
         BarDataSet set = new BarDataSet(entries, "Screen Time");
-        set.setColor(Color.WHITE);
+        set.setColor(Color.parseColor("#553479"));
 
         BarData data = new BarData(set);
         data.setBarWidth(0.5f);
@@ -71,9 +71,9 @@ public class ProfileActivity extends AppCompatActivity {
         barChart.setData(data);
         barChart.getDescription().setEnabled(false);
         barChart.getLegend().setEnabled(false);
-        barChart.getAxisLeft().setTextColor(Color.WHITE);
+        barChart.getAxisLeft().setTextColor(Color.BLACK);
         barChart.getAxisRight().setEnabled(false);
-        barChart.getXAxis().setTextColor(Color.WHITE);
+        barChart.getXAxis().setTextColor(Color.BLACK);
 
         String[] days = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(days));
