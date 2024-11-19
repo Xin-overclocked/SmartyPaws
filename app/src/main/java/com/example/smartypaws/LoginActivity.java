@@ -2,6 +2,7 @@ package com.example.smartypaws;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,8 +55,24 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Implement your login logic here
-        // For example:
-        // authViewModel.login(email, password);
+        // Create AuthViewModel.java
+//        authViewModel.login(email, password);
+
+        // Optionally handle success or failure with LiveData observers
+//        authViewModel.getLoginResult().observe(this, result -> {
+//            if (result.isSuccess()) {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
+//            } else {
+//                Toast.makeText(this, "Login failed: " + result.getErrorMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
     }
 }
