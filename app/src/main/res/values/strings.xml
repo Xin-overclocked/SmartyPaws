@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SmartyPaws</string>
+    <string name="new_flashcard_or_quiz">new flashcard or quiz</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
