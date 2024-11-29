@@ -1,8 +1,11 @@
 package com.example.smartypaws;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,22 +28,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Set up the search functionality
-        SearchView searchView = findViewById(R.id.searchView);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // Handle search submit
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                // Handle search text changes
-                return true;
-            }
-        });
 
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
@@ -69,8 +56,37 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                // Handle FAB click (e.g., open a dialog to add a new flashcard)
+            public void onClick(View v) {
+                // Create a dialog instance
+                Dialog dialog = new Dialog(MainActivity.this);
+                dialog.setContentView(R.layout.plus_btn_options);
+
+                // Reference buttons inside the dialog
+                Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
+                Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
+
+                // Set click listeners for the dialog buttons
+                createFlashcard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Action for creating a new flashcard
+                        startActivity(new Intent(getApplicationContext(), FlashcardEditActivity.class));
+                        dialog.dismiss();
+
+                    }
+                });
+
+                createQuiz.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Action for creating a new quiz
+                        dialog.dismiss();
+                        // Add your navigation or creation logic here
+                    }
+                });
+
+                // Show the dialog
+                dialog.show();
             }
         });
 

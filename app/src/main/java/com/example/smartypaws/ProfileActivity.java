@@ -1,8 +1,12 @@
 package com.example.smartypaws;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.smartypaws.databinding.ActivityMainBinding;
@@ -82,8 +86,41 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupFAB() {
-        fab.setOnClickListener(view -> {
-            // Handle FAB click
+        // Set up FAB click listener
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create a dialog instance
+                Dialog dialog = new Dialog(ProfileActivity.this);
+                dialog.setContentView(R.layout.plus_btn_options);
+
+                // Reference buttons inside the dialog
+                Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
+                Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
+
+                // Set click listeners for the dialog buttons
+                createFlashcard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Action for creating a new flashcard
+                        startActivity(new Intent(getApplicationContext(), FlashcardEditActivity.class));
+                        dialog.dismiss();
+
+                    }
+                });
+
+                createQuiz.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Action for creating a new quiz
+                        dialog.dismiss();
+                        // Add your navigation or creation logic here
+                    }
+                });
+
+                // Show the dialog
+                dialog.show();
+            }
         });
     }
 

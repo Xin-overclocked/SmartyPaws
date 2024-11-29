@@ -67,13 +67,6 @@
                         android:textStyle="italic"
                         android:layout_marginBottom="16dp"/>
 
-                    <androidx.appcompat.widget.SearchView
-                        android:id="@+id/searchView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/search_background"
-                        app:queryHint="Search Here"
-                        app:iconifiedByDefault="false"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

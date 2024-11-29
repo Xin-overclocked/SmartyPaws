@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "241926171348",
+    "project_id": "smartypaws-bb6b5",
+    "storage_bucket": "smartypaws-bb6b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241926171348:android:e89ea8b06d0df2f4f2e941",
+        "android_client_info": {
+          "package_name": "com.example.smartypaws"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAuMFoN8ffU7Uf5maOdq4PoyqLJftMj1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
