@@ -117,6 +117,8 @@ public class FlashcardViewActivity extends AppCompatActivity {
 
     private void startStudyMode() {
         // Implementation for study mode
-        Toast.makeText(this, "Starting study mode...", Toast.LENGTH_SHORT).show();
+        Intent studyIntent = new Intent(this, FlashcardStudyActivity.class);
+//        editIntent.putExtra("FLASHCARD_SET_ID", flashcardSetId);
+        startActivity(studyIntent);
     }
 }
