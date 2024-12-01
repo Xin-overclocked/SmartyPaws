@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<androidx.constraintlayout.widget.ConstraintLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp"
+android:layout_marginTop="52dp"
+android:backgroundTint="@color/white"
+>
+
+<ImageButton
+        android:id="@+id/btnReturn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/return_button"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="72dp"
+            android:text="@string/set_your_quiz_parameters"
+            android:textAlignment="center"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/public_sans_bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnReturn"/>
+    <TextView
+            android:id="@+id/tvNumberOfQuestions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="44dp"
+            android:text="@string/number_of_questions"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"/>
+    <EditText
+            android:id="@+id/etNumberOfQuestions"
+            android:layout_width="100dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/edit_text_background"
+            android:inputType="number"
+            android:maxLength="2"
+            android:padding="12dp"
+
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvNumberOfQuestions" app:layout_constraintHorizontal_bias="0.505"/>
+    <TextView
+            android:id="@+id/tvTotalQuestions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/total_questions"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etNumberOfQuestions" app:layout_constraintHorizontal_bias="0.505"/>
+
+
+    <ImageButton
+            android:layout_width="229dp" android:layout_height="260dp"
+            android:id="@+id/btnPlay"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:src="@drawable/ic_play"
+            app:backgroundTint="@color/white"
+            app:tint="#7948AE"
+            android:layout_marginBottom="44dp"
+            android:background="@drawable/circular_background"
+            android:scaleType="fitCenter"
+
+            app:layout_constraintTop_toBottomOf="@+id/tvTotalQuestions" app:layout_constraintVertical_bias="0.672"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
