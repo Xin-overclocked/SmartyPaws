@@ -17,6 +17,7 @@ public class FlashcardViewActivity extends AppCompatActivity {
 
     private String flashcardSetId;
     private String flashcardSetTitle;
+    private String flashcardSetDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,16 @@ public class FlashcardViewActivity extends AppCompatActivity {
         // Get flashcard id and title from the intent
         flashcardSetId = getIntent().getStringExtra("FLASHCARD_SET_ID");
         flashcardSetTitle = getIntent().getStringExtra("FLASHCARD_SET_TITLE");
+        flashcardSetDescription = getIntent().getStringExtra("FLASHCARD_SET_DESCRIPTION");
+
+        // Use the data to set up your view
+        TextView titleTextView = findViewById(R.id.flashcardTitle);
+        titleTextView.setText(flashcardSetTitle);
+        TextView descriptionTextView = findViewById(R.id.flashcardDescription);
+        descriptionTextView.setText(flashcardSetDescription);
+
+        // Fetch and display flashcard data using the ID
+        //
 
         // Setup back button
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
@@ -118,7 +129,8 @@ public class FlashcardViewActivity extends AppCompatActivity {
     private void startStudyMode() {
         // Implementation for study mode
         Intent studyIntent = new Intent(this, FlashcardStudyActivity.class);
-//        editIntent.putExtra("FLASHCARD_SET_ID", flashcardSetId);
+        studyIntent.putExtra("FLASHCARD_SET_ID", flashcardSetId);
+        studyIntent.putExtra("FLASHCARD_SET_TITLE", flashcardSetTitle);
         startActivity(studyIntent);
     }
 }

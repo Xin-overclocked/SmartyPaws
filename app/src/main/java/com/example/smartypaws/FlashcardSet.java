@@ -3,6 +3,7 @@ package com.example.smartypaws;
 import java.util.List;
 
 public class FlashcardSet {
+    private String id;
     private String title;
     private String date;
     private String description;
@@ -18,7 +19,13 @@ public class FlashcardSet {
         this.flashcards = flashcards;
     }
 
+    public FlashcardSet(String title,String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     // Getters and setters
+    public String getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDate() { return date; }

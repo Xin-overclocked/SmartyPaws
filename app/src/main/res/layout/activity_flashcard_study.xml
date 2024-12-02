@@ -23,7 +23,7 @@
             android:contentDescription="Back"/>
 
         <TextView
-            android:id="@+id/titleText"
+            android:id="@+id/flashcardTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

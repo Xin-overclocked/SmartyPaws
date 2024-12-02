@@ -23,11 +23,20 @@ public class FlashcardStudyActivity extends AppCompatActivity {
     private int currentPosition = 0; // 5th card (0-based index)
     private int totalCards = 15;
     private boolean isShowingTerm = true;
+    private String flashcardSetId;
+    private String flashcardSetTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flashcard_study);
+
+        // Get flashcard id and title from the intent
+        flashcardSetId = getIntent().getStringExtra("FLASHCARD_SET_ID");
+        flashcardSetTitle = getIntent().getStringExtra("FLASHCARD_SET_TITLE");
+
+        TextView titleTextView = findViewById(R.id.flashcardTitle);
+        titleTextView.setText(flashcardSetTitle);
 
         // Initialize views
         termText = findViewById(R.id.termText);

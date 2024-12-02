@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -37,17 +38,18 @@ public class MainActivity extends AppCompatActivity {
         myFlashcardsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         // Sample data - replace with your actual data
-        List<Flashcard> recentlyStudiedList = new ArrayList<>();
-        List<Flashcard> myFlashcardsList = new ArrayList<>();
+        List<FlashcardSet> recentlyStudiedList = new ArrayList<>();
+        List<FlashcardSet> myFlashcardsList = new ArrayList<>();
 
         // Add sample flashcards
-        recentlyStudiedList.add(new Flashcard("Recently Studied 1", "Description 1"));
-        recentlyStudiedList.add(new Flashcard("Recently Studied 2", "Description 2"));
-        myFlashcardsList.add(new Flashcard("My Flashcard 1", "Description 1"));
-        myFlashcardsList.add(new Flashcard("My Flashcard 2", "Description 2"));
+        recentlyStudiedList.add(new FlashcardSet("Recently Studied 1", "Description 1"));
+        recentlyStudiedList.add(new FlashcardSet("Recently Studied 2", "Description 2"));
+        myFlashcardsList.add(new FlashcardSet("My Flashcard 1", "Description 1"));
+        myFlashcardsList.add(new FlashcardSet("My Flashcard 2", "Description 2"));
 
-        recentlyStudiedAdapter = new FlashcardAdapter(recentlyStudiedList);
-        myFlashcardsAdapter = new FlashcardAdapter(myFlashcardsList);
+        // Create adapters with click listeners
+        recentlyStudiedAdapter = new FlashcardAdapter(recentlyStudiedList, flashcardSet -> navigateToFlashcardView(flashcardSet));
+        myFlashcardsAdapter = new FlashcardAdapter(myFlashcardsList, flashcardSet -> navigateToFlashcardView(flashcardSet));
 
         recentlyStudiedRecyclerView.setAdapter(recentlyStudiedAdapter);
         myFlashcardsRecyclerView.setAdapter(myFlashcardsAdapter);
@@ -105,5 +107,13 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    private void navigateToFlashcardView(FlashcardSet flashcardSet) {
+        Intent intent = new Intent(MainActivity.this, FlashcardViewActivity.class);
+        intent.putExtra("FLASHCARD_SET_ID", flashcardSet.getId()); // Assuming Flashcard has an getId() method
+        intent.putExtra("FLASHCARD_SET_TITLE", flashcardSet.getTitle());
+        intent.putExtra("FLASHCARD_SET_DESCRIPTION", flashcardSet.getDescription());
+        startActivity(intent);
     }
 }

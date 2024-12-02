@@ -1,19 +1,23 @@
 package com.example.smartypaws;
 
 public class Flashcard {
-    private String title;
-    private String description;
+    private int id;
+    private String term;
+    private String definition;
 
-    public Flashcard(String title, String description) {
-        this.title = title;
-        this.description = description;
+    public Flashcard(String term, String definition) {
+        this.term = term;
+        this.definition = definition;
     }
 
-    public String getTitle() {
-        return title;
+    public int getId() {
+        return id;
+    }
+    public String getTerm() {
+        return term;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDefinition() {
+        return definition;
     }
 }
