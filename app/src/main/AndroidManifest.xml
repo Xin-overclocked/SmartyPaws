@@ -23,6 +23,9 @@
         <activity android:name=".ProfileActivity" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".MainActivity" />
+        <activity android:name=".FlashcardEditActivity" />
+        <activity android:name=".FlashcardViewActivity" />
+        <activity android:name=".FlashcardStudyActivity" />
     </application>
 
 </manifest>

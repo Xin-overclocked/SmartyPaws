@@ -1,8 +1,12 @@
 package com.example.smartypaws;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,22 +30,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Set up the search functionality
-        SearchView searchView = findViewById(R.id.searchView);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // Handle search submit
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                // Handle search text changes
-                return true;
-            }
-        });
-
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
         myFlashcardsRecyclerView = findViewById(R.id.myFlashcardsRecyclerView);
@@ -50,17 +38,18 @@ public class MainActivity extends AppCompatActivity {
         myFlashcardsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         // Sample data - replace with your actual data
-        List<Flashcard> recentlyStudiedList = new ArrayList<>();
-        List<Flashcard> myFlashcardsList = new ArrayList<>();
+        List<FlashcardSet> recentlyStudiedList = new ArrayList<>();
+        List<FlashcardSet> myFlashcardsList = new ArrayList<>();
 
         // Add sample flashcards
-        recentlyStudiedList.add(new Flashcard("Recently Studied 1", "Description 1"));
-        recentlyStudiedList.add(new Flashcard("Recently Studied 2", "Description 2"));
-        myFlashcardsList.add(new Flashcard("My Flashcard 1", "Description 1"));
-        myFlashcardsList.add(new Flashcard("My Flashcard 2", "Description 2"));
+        recentlyStudiedList.add(new FlashcardSet("Recently Studied 1", "Description 1"));
+        recentlyStudiedList.add(new FlashcardSet("Recently Studied 2", "Description 2"));
+        myFlashcardsList.add(new FlashcardSet("My Flashcard 1", "Description 1"));
+        myFlashcardsList.add(new FlashcardSet("My Flashcard 2", "Description 2"));
 
-        recentlyStudiedAdapter = new FlashcardAdapter(recentlyStudiedList);
-        myFlashcardsAdapter = new FlashcardAdapter(myFlashcardsList);
+        // Create adapters with click listeners
+        recentlyStudiedAdapter = new FlashcardAdapter(recentlyStudiedList, flashcardSet -> navigateToFlashcardView(flashcardSet));
+        myFlashcardsAdapter = new FlashcardAdapter(myFlashcardsList, flashcardSet -> navigateToFlashcardView(flashcardSet));
 
         recentlyStudiedRecyclerView.setAdapter(recentlyStudiedAdapter);
         myFlashcardsRecyclerView.setAdapter(myFlashcardsAdapter);
@@ -69,8 +58,37 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                // Handle FAB click (e.g., open a dialog to add a new flashcard)
+            public void onClick(View v) {
+                // Create a dialog instance
+                Dialog dialog = new Dialog(MainActivity.this);
+                dialog.setContentView(R.layout.plus_btn_options);
+
+                // Reference buttons inside the dialog
+                Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
+                Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
+
+                // Set click listeners for the dialog buttons
+                createFlashcard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Action for creating a new flashcard
+                        startActivity(new Intent(getApplicationContext(), FlashcardEditActivity.class));
+                        dialog.dismiss();
+
+                    }
+                });
+
+                createQuiz.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Action for creating a new quiz
+                        dialog.dismiss();
+                        // Add your navigation or creation logic here
+                    }
+                });
+
+                // Show the dialog
+                dialog.show();
             }
         });
 
@@ -89,5 +107,13 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    private void navigateToFlashcardView(FlashcardSet flashcardSet) {
+        Intent intent = new Intent(MainActivity.this, FlashcardViewActivity.class);
+        intent.putExtra("FLASHCARD_SET_ID", flashcardSet.getId()); // Assuming Flashcard has an getId() method
+        intent.putExtra("FLASHCARD_SET_TITLE", flashcardSet.getTitle());
+        intent.putExtra("FLASHCARD_SET_DESCRIPTION", flashcardSet.getDescription());
+        startActivity(intent);
     }
 }

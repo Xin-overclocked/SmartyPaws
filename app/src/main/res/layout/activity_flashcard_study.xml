@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back"/>
+
+        <TextView
+            android:id="@+id/flashcardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Flashcard: DATABASE L4"
+            android:textSize="18sp"
+            android:textColor="#000000"/>
+    </RelativeLayout>
+
+    <!-- Main Content -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Navigation Button Left -->
+        <ImageButton
+            android:id="@+id/prevButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_chevron_left"
+            android:contentDescription="Previous"/>
+
+        <!-- Flashcard Container -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/flashcardContainer"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="64dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
+
+            <FrameLayout
+                android:id="@+id/flipContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- Front of card -->
+                <TextView
+                    android:id="@+id/termText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#673AB7"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="Obvio"
+                    android:textColor="#FFFFFF"
+                    android:textSize="24sp"/>
+
+                <!-- Back of card -->
+                <TextView
+                    android:id="@+id/definitionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#9575CD"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="Definition here"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:visibility="gone"/>
+
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Navigation Button Right -->
+        <ImageButton
+            android:id="@+id/nextButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="Next"/>
+    </RelativeLayout>
+
+    <!-- Progress Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/progressText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="5 / 15"
+            android:textColor="#666666"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:progressTint="#673AB7"
+            android:progress="33"/>
+    </LinearLayout>
+</LinearLayout>
