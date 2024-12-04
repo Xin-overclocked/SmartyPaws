@@ -50,10 +50,8 @@ public class LoginActivity extends AppCompatActivity {
 
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
-            return;
         } else {
             checkAccount(email, password);
         }
