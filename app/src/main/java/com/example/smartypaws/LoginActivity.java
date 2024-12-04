@@ -3,16 +3,11 @@ package com.example.smartypaws;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.smartypaws.databinding.ActivityLoginBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -71,41 +66,33 @@ public class LoginActivity extends AppCompatActivity {
         db.collection("users")
                 .whereEqualTo("email", email)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                            QuerySnapshot querySnapshot = task.getResult();
-                            boolean isPasswordCorrect = false;
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        boolean isPasswordCorrect = false;
 
-                            for (QueryDocumentSnapshot document : querySnapshot) {
-                                String storedPassword = document.getString("password");
-                                if (storedPassword != null && storedPassword.equals(password)) {
-                                    isPasswordCorrect = true;
-                                    break;
-                                }
+                        for (QueryDocumentSnapshot document : querySnapshot) {
+                            String storedPassword = document.getString("password");
+                            if (storedPassword != null && storedPassword.equals(password)) {
+                                isPasswordCorrect = true;
+                                break;
                             }
-
-                            if (isPasswordCorrect) {
-                                Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-
-                            } else {
-                                Toast.makeText(LoginActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Account not found", Toast.LENGTH_SHORT).show();
                         }
 
+                        if (isPasswordCorrect) {
+                            Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Account not found", Toast.LENGTH_SHORT).show();
                     }
+
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnFailureListener(e -> Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show());
     }
 
 }
