@@ -58,8 +58,6 @@ public class LoginActivity extends AppCompatActivity {
             checkAccount(email, password);
         }
 
-        startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        finish();
     }
 
     private void checkAccount(String email, String password) {
