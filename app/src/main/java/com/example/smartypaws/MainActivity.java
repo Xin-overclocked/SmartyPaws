@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         // Action for creating a new quiz
+                        startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
                         dialog.dismiss();
                         // Add your navigation or creation logic here
                     }
@@ -98,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_profile) {
                 startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
-//                    overrideActivityTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 finish();
                 return true;
             }
