@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "241926171348",
-    "project_id": "smartypaws-bb6b5",
-    "storage_bucket": "smartypaws-bb6b5.firebasestorage.app"
+    "project_number": "171206094154",
+    "firebase_url": "https://smartypaws-f2e26-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "smartypaws-f2e26",
+    "storage_bucket": "smartypaws-f2e26.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:241926171348:android:e89ea8b06d0df2f4f2e941",
+        "mobilesdk_app_id": "1:171206094154:android:1cfdabdfc135217217e5b3",
         "android_client_info": {
           "package_name": "com.example.smartypaws"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCAuMFoN8ffU7Uf5maOdq4PoyqLJftMj1k"
+          "current_key": "AIzaSyAYkOLhVFEnMggN4v_69Ww5Mj_V6RhTpLA"
         }
       ],
       "services": {
