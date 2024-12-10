@@ -3,76 +3,92 @@ package com.example.smartypaws;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
+import com.example.smartypaws.databinding.ActivityLoginBinding;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
-    private TextInputEditText emailInput;
-    private TextInputEditText passwordInput;
-    private MaterialButton loginButton;
-    private MaterialButton googleSignInButton;
-    private TextView signUpLink;
+
+    private ActivityLoginBinding activityLoginBinding;
+
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
 
-        // Initialize views
-        emailInput = findViewById(R.id.emailInput);
-        passwordInput = findViewById(R.id.passwordInput);
-        loginButton = findViewById(R.id.loginButton);
-        googleSignInButton = findViewById(R.id.googleSignInButton);
-        signUpLink = findViewById(R.id.signUpLink);
+        // Inflate the binding
+        activityLoginBinding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(activityLoginBinding.getRoot());
 
-        // Set up click listeners
-        findViewById(R.id.signUpLink).setOnClickListener(v -> {
+        // Set up click listener
+        activityLoginBinding.signUpLink.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
 
-        loginButton.setOnClickListener(v -> {
-            performLogin();
-        });
+        db = FirebaseFirestore.getInstance();
 
-        googleSignInButton.setOnClickListener(v -> {
+        activityLoginBinding.loginButton.setOnClickListener(v -> performLogin());
+
+        activityLoginBinding.googleSignInButton.setOnClickListener(v -> {
             // Implement Google Sign In
             Toast.makeText(this, "Google Sign In clicked", Toast.LENGTH_SHORT).show();
         });
     }
 
     private void performLogin() {
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString().trim();
+        String email = Objects.requireNonNull(activityLoginBinding.emailInput.getText()).toString().trim();
+        String password = Objects.requireNonNull(activityLoginBinding.passwordInput.getText()).toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
-            return;
+        } else {
+            checkAccount(email, password);
         }
-
-        // Implement your login logic here
-        // Create AuthViewModel.java
-//        authViewModel.login(email, password);
-
-        // Optionally handle success or failure with LiveData observers
-//        authViewModel.getLoginResult().observe(this, result -> {
-//            if (result.isSuccess()) {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                finish();
-//            } else {
-//                Toast.makeText(this, "Login failed: " + result.getErrorMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
     }
+
+    private void checkAccount(String email, String password) {
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        boolean isPasswordCorrect = false;
+
+                        for (QueryDocumentSnapshot document : querySnapshot) {
+                            String storedPassword = document.getString("password");
+                            if (storedPassword != null && storedPassword.equals(password)) {
+                                isPasswordCorrect = true;
+                                break;
+                            }
+                        }
+
+                        if (isPasswordCorrect) {
+                            Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Account not found", Toast.LENGTH_SHORT).show();
+                    }
+
+                })
+                .addOnFailureListener(e -> Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show());
+    }
+
 }
