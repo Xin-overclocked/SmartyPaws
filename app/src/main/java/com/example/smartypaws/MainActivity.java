@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                         // Action for creating a new quiz
                         startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
                         dialog.dismiss();
-                        // Add your navigation or creation logic here
                     }
                 });
 

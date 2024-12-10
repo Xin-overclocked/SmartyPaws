@@ -59,11 +59,11 @@ public class QuizViewActivity extends AppCompatActivity {
         // Simulating database data
         List<Quiz.Question> questions = new ArrayList<>();
         questions.add(new Quiz.Question("What is the capital of France?",
-                List.of("London", "Berlin", "Paris", "Madrid")));
+                List.of("London", "Berlin", "Paris", "Madrid"), 2));
         questions.add(new Quiz.Question("Which planet is known as the Red Planet?",
-                List.of("Mars", "Venus", "Jupiter", "Saturn")));
+                List.of("Mars", "Venus", "Jupiter", "Saturn"), 0));
         questions.add(new Quiz.Question("Who painted the Mona Lisa?",
-                List.of("Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Michelangelo")));
+                List.of("Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Michelangelo"), 0));
 
         quiz = new Quiz("MAD Lecture 2 Quiz", new Date(), "This is a quiz description.", questions);
     }
