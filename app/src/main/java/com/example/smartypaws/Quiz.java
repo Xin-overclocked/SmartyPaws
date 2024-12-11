@@ -3,7 +3,7 @@ package com.example.smartypaws;
 import java.util.List;
 import java.util.Date;
 
-public class Quiz {
+public class Quiz implements StudyItem {
     private String id;  // Firebase key
     private String title;
     private Date date;
@@ -23,6 +23,11 @@ public class Quiz {
         this.date = date;
         this.description = description;
         this.questions = questions;
+    }
+
+    public Quiz (String title, String description) {
+        this.title = title;
+        this.description = description;
     }
 
     // Getters

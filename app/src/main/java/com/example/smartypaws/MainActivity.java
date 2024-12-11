@@ -21,8 +21,10 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recentlyStudiedRecyclerView;
     private RecyclerView myFlashcardsRecyclerView;
-    private FlashcardAdapter recentlyStudiedAdapter;
-    private FlashcardAdapter myFlashcardsAdapter;
+    private RecyclerView myQuizzesRecyclerView;
+    private StudyItemAdapter recentlyStudiedAdapter;
+    private StudyItemAdapter myFlashcardsAdapter;
+    private StudyItemAdapter myQuizzesAdapter;
 
 
     @Override
@@ -33,26 +35,33 @@ public class MainActivity extends AppCompatActivity {
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
         myFlashcardsRecyclerView = findViewById(R.id.myFlashcardsRecyclerView);
+        myQuizzesRecyclerView = findViewById(R.id.myQuizzesRecyclerView);
 
         recentlyStudiedRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         myFlashcardsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        myQuizzesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         // Sample data - replace with your actual data
-        List<FlashcardSet> recentlyStudiedList = new ArrayList<>();
-        List<FlashcardSet> myFlashcardsList = new ArrayList<>();
+        List<StudyItem> recentlyStudiedList = new ArrayList<>();
+        List<StudyItem> myFlashcardsList = new ArrayList<>();
+        List<StudyItem> myQuizzesList = new ArrayList<>();
 
         // Add sample flashcards
-        recentlyStudiedList.add(new FlashcardSet("Recently Studied 1", "Description 1"));
-        recentlyStudiedList.add(new FlashcardSet("Recently Studied 2", "Description 2"));
+        recentlyStudiedList.add(new FlashcardSet("Recently Studied Flashcard", "Description 1"));
+        recentlyStudiedList.add(new Quiz("Recently Studied Quiz", "Description 2"));
         myFlashcardsList.add(new FlashcardSet("My Flashcard 1", "Description 1"));
         myFlashcardsList.add(new FlashcardSet("My Flashcard 2", "Description 2"));
+        myQuizzesList.add(new Quiz("My Quiz 1", "Description 1"));
+        myQuizzesList.add(new Quiz("My Quiz 2", "Description 2"));
 
         // Create adapters with click listeners
-        recentlyStudiedAdapter = new FlashcardAdapter(recentlyStudiedList, flashcardSet -> navigateToFlashcardView(flashcardSet));
-        myFlashcardsAdapter = new FlashcardAdapter(myFlashcardsList, flashcardSet -> navigateToFlashcardView(flashcardSet));
+        recentlyStudiedAdapter = new StudyItemAdapter(recentlyStudiedList, this::navigateToView);
+        myFlashcardsAdapter = new StudyItemAdapter(myFlashcardsList, this::navigateToView);
+        myQuizzesAdapter = new StudyItemAdapter(myQuizzesList, this::navigateToView);
 
         recentlyStudiedRecyclerView.setAdapter(recentlyStudiedAdapter);
         myFlashcardsRecyclerView.setAdapter(myFlashcardsAdapter);
+        myQuizzesRecyclerView.setAdapter(myQuizzesAdapter);
 
         // Set up FAB click listener
         FloatingActionButton fab = findViewById(R.id.fabAdd);
@@ -108,11 +117,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void navigateToFlashcardView(FlashcardSet flashcardSet) {
-        Intent intent = new Intent(MainActivity.this, FlashcardViewActivity.class);
-        intent.putExtra("FLASHCARD_SET_ID", flashcardSet.getId()); // Assuming Flashcard has an getId() method
-        intent.putExtra("FLASHCARD_SET_TITLE", flashcardSet.getTitle());
-        intent.putExtra("FLASHCARD_SET_DESCRIPTION", flashcardSet.getDescription());
-        startActivity(intent);
+
+
+    private void navigateToView(StudyItem studyItem) {
+        if (studyItem instanceof FlashcardSet) {
+            FlashcardSet flashcardSet = (FlashcardSet) studyItem;
+            Intent intent = new Intent(MainActivity.this, FlashcardViewActivity.class);
+            intent.putExtra("FLASHCARD_SET_ID", flashcardSet.getId()); // Assuming Flashcard has an getId() method
+            intent.putExtra("FLASHCARD_SET_TITLE", flashcardSet.getTitle());
+            intent.putExtra("FLASHCARD_SET_DESCRIPTION", flashcardSet.getDescription());
+            startActivity(intent);
+        }
+        if (studyItem instanceof Quiz) {
+            Quiz quiz = (Quiz) studyItem;
+            Intent intent = new Intent(MainActivity.this, QuizViewActivity.class);
+            intent.putExtra("QUIZ_ID", quiz.getId()); // Assuming Flashcard has an getId() method
+            intent.putExtra("QUIZ_TITLE", quiz.getTitle());
+            intent.putExtra("QUIZ_DESCRIPTION", quiz.getDescription());
+            startActivity(intent);
+        }
     }
 }

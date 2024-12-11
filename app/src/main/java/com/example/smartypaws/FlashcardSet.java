@@ -2,7 +2,7 @@ package com.example.smartypaws;
 
 import java.util.List;
 
-public class FlashcardSet {
+public class FlashcardSet implements StudyItem{
     private String id;
     private String title;
     private String date;
