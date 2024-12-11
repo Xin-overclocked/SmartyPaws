@@ -2,21 +2,21 @@ package com.example.smartypaws;
 
 import java.util.List;
 
-public class FlashcardSet {
+public class FlashcardSet implements StudyItem{
     private String id;
     private String title;
     private String date;
     private String description;
-    private List<Flashcard> flashcards;
+    private List<Flashcard> flashcardList;
 
     // Default constructor required for calls to DataSnapshot.getValue(FlashcardSet.class)
     public FlashcardSet() {}
 
-    public FlashcardSet(String title, String date, String description, List<Flashcard> flashcards) {
+    public FlashcardSet(String title, String date, String description, List<Flashcard> flashcardList) {
         this.title = title;
         this.date = date;
         this.description = description;
-        this.flashcards = flashcards;
+        this.flashcardList = flashcardList;
     }
 
     public FlashcardSet(String title,String description) {
@@ -32,6 +32,6 @@ public class FlashcardSet {
     public void setDate(String date) { this.date = date; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public List<Flashcard> getFlashcards() { return flashcards; }
-    public void setFlashcards(List<Flashcard> flashcards) { this.flashcards = flashcards; }
+    public List<Flashcard> getFlashcardList() { return flashcardList; }
+    public void setFlashcards(List<Flashcard> flashcardList) { this.flashcardList = flashcardList; }
 }
