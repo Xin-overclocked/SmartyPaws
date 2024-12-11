@@ -26,6 +26,11 @@
         <activity android:name=".FlashcardEditActivity" />
         <activity android:name=".FlashcardViewActivity" />
         <activity android:name=".FlashcardStudyActivity" />
+        <activity android:name=".QuizEditActivity" />
+        <activity android:name=".QuizViewActivity" />
+        <activity android:name=".EditProfileActivity" />
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".FeedbackActivity" />
     </application>
 
 </manifest>

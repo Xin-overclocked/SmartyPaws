@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,7 +25,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private BarChart barChart;
     private FloatingActionButton fab;
-
+    private ImageButton settingButton;
+    private Button editButton;
     ActivityMainBinding binding;
 
     @Override
@@ -37,6 +39,20 @@ public class ProfileActivity extends AppCompatActivity {
 
         setupBarChart();
         setupFAB();
+
+        // Set up setting button
+        settingButton = findViewById(R.id.setting_button);
+        settingButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+            startActivity(intent);
+        });
+
+        // Set up edit button
+        editButton = findViewById(R.id.edit_button);
+        editButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+            startActivity(intent);
+        });
 
         // Set up bottom navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
@@ -113,8 +129,8 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         // Action for creating a new quiz
+                        startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
                         dialog.dismiss();
-                        // Add your navigation or creation logic here
                     }
                 });
 
