@@ -47,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
         List<StudyItem> myQuizzesList = new ArrayList<>();
 
         // Add sample flashcards
-        recentlyStudiedList.add(new FlashcardSet("Recently Studied Flashcard", "Description 1"));
-        recentlyStudiedList.add(new Quiz("Recently Studied Quiz", "Description 2"));
-        myFlashcardsList.add(new FlashcardSet("My Flashcard 1", "Description 1"));
-        myFlashcardsList.add(new FlashcardSet("My Flashcard 2", "Description 2"));
-        myQuizzesList.add(new Quiz("My Quiz 1", "Description 1"));
-        myQuizzesList.add(new Quiz("My Quiz 2", "Description 2"));
+//        recentlyStudiedList.add(new FlashcardSet("Recently Studied Flashcard", "Description 1"));
+//        recentlyStudiedList.add(new Quiz("Recently Studied Quiz", "Description 2"));
+//        myFlashcardsList.add(new FlashcardSet("My Flashcard 1", "Description 1"));
+//        myFlashcardsList.add(new FlashcardSet("My Flashcard 2", "Description 2"));
+//        myQuizzesList.add(new Quiz("My Quiz 1", "Description 1"));
+//        myQuizzesList.add(new Quiz("My Quiz 2", "Description 2"));
 
         // Create adapters with click listeners
         recentlyStudiedAdapter = new StudyItemAdapter(recentlyStudiedList, this::navigateToView);

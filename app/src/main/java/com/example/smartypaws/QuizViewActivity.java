@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,15 +14,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
+import com.bumptech.glide.Glide;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,11 +27,19 @@ import java.util.Locale;
 public class QuizViewActivity extends AppCompatActivity {
     private LinearLayout questionsContainer;
     private Quiz quiz;
+    private FirebaseFirestore db;
+    private String quizId;
+    private String quizTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz_view);
+
+        db = FirebaseFirestore.getInstance();
+
+        // Get quiz ID from intent
+        quizId = getIntent().getStringExtra("QUIZ_ID");
 
         // Initialize views
         questionsContainer = findViewById(R.id.questionsContainer);
@@ -45,27 +49,36 @@ public class QuizViewActivity extends AppCompatActivity {
 
         // Set click listeners
         backButton.setOnClickListener(v -> finish());
-        menuButton.setOnClickListener(v -> showOptionsMenu());
+        menuButton.setOnClickListener(this::showOptionsMenu);
         studyButton.setOnClickListener(v -> startStudyMode());
 
         // Load quiz data
         loadQuizData();
-
-        // Display quiz data
-        displayQuizData();
     }
 
     private void loadQuizData() {
-        // Simulating database data
-        List<Quiz.Question> questions = new ArrayList<>();
-        questions.add(new Quiz.Question("What is the capital of France?",
-                List.of("London", "Berlin", "Paris", "Madrid"), 2));
-        questions.add(new Quiz.Question("Which planet is known as the Red Planet?",
-                List.of("Mars", "Venus", "Jupiter", "Saturn"), 0));
-        questions.add(new Quiz.Question("Who painted the Mona Lisa?",
-                List.of("Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Michelangelo"), 0));
+        db.collection("quizzes").document(quizId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    quiz = documentSnapshot.toObject(Quiz.class);
+                    if (quiz != null) {
+                        displayQuizData();
+                        updateLastAccessed();
+                    } else {
+                        Toast.makeText(this, "Failed to load quiz data", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error loading quiz: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
-        quiz = new Quiz("MAD Lecture 2 Quiz", new Date(), "This is a quiz description.", questions);
+    private void updateLastAccessed() {
+        db.collection("quizzes").document(quizId)
+                .update("lastAccessed", Timestamp.now())
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to update last accessed time", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void displayQuizData() {
@@ -76,7 +89,7 @@ public class QuizViewActivity extends AppCompatActivity {
         // Set quiz date
         TextView quizDateTextView = findViewById(R.id.quizDateTextView);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
-        quizDateTextView.setText(dateFormat.format(quiz.getDate()));
+        quizDateTextView.setText(dateFormat.format(new Date(quiz.getDate())));
 
         // Set quiz description
         TextView quizDescriptionTextView = findViewById(R.id.quizDescriptionTextView);
@@ -87,6 +100,7 @@ public class QuizViewActivity extends AppCompatActivity {
         questionsCountTextView.setText(quiz.getQuestions().size() + " questions");
 
         // Add questions
+        questionsContainer.removeAllViews();
         for (int i = 0; i < quiz.getQuestions().size(); i++) {
             addQuestionView(i + 1, quiz.getQuestions().get(i));
         }
@@ -95,61 +109,99 @@ public class QuizViewActivity extends AppCompatActivity {
     private void addQuestionView(int questionNumber, Quiz.Question question) {
         View questionView = getLayoutInflater().inflate(R.layout.item_question, questionsContainer, false);
 
-        // Set question number
-        TextView questionNumberTextView = questionView.findViewById(R.id.questionNumberTextView);
-        questionNumberTextView.setText("Question " + questionNumber);
+        // Set question text
+        TextView questionTextView = questionView.findViewById(R.id.questionTextView);
+        questionTextView.setText(question.getText());
+
+        // Load question image if available
+        ImageView questionImageView = questionView.findViewById(R.id.questionImageView);
+        if (question.getImageUrl() != null && !question.getImageUrl().isEmpty()) {
+            questionImageView.setVisibility(View.VISIBLE);
+            Glide.with(this).load(question.getImageUrl()).into(questionImageView);
+        } else {
+            questionImageView.setVisibility(View.GONE);
+        }
+
+        // Add audio button if available
+        Button audioButton = questionView.findViewById(R.id.audioButton);
+        if (question.getAudioUrl() != null && !question.getAudioUrl().isEmpty()) {
+            audioButton.setVisibility(View.VISIBLE);
+            audioButton.setOnClickListener(v -> playAudio(question.getAudioUrl()));
+        } else {
+            audioButton.setVisibility(View.GONE);
+        }
 
         // Get the options container
         LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);
         optionsContainer.removeAllViews(); // Clear any existing views
 
         // Add options dynamically
-        for (String optionText : question.getOptions()) {
+        for (Quiz.Question.Option option : question.getOptions()) {
             Button optionButton = (Button) getLayoutInflater().inflate(R.layout.item_option, optionsContainer, false);
-            optionButton.setText(optionText);
-            optionButton.setOnClickListener(v -> handleOptionClick(optionButton));
+            optionButton.setText(option.getText());
+            optionButton.setOnClickListener(v -> handleOptionClick(optionButton, option.isCorrect()));
             optionsContainer.addView(optionButton);
+
+            // Load option image if available
+            ImageView optionImageView = optionButton.findViewById(R.id.optionImageView);
+            if (option.getImageUrl() != null && !option.getImageUrl().isEmpty()) {
+                optionImageView.setVisibility(View.VISIBLE);
+                Glide.with(this).load(option.getImageUrl()).into(optionImageView);
+            } else {
+                optionImageView.setVisibility(View.GONE);
+            }
+
+            // Add audio button for option if available
+            Button optionAudioButton = optionButton.findViewById(R.id.optionAudioButton);
+            if (option.getAudioUrl() != null && !option.getAudioUrl().isEmpty()) {
+                optionAudioButton.setVisibility(View.VISIBLE);
+                optionAudioButton.setOnClickListener(v -> playAudio(option.getAudioUrl()));
+            } else {
+                optionAudioButton.setVisibility(View.GONE);
+            }
         }
 
         questionsContainer.addView(questionView);
     }
 
-    private void handleOptionClick(Button option) {
-        // TODO: Implement option selection logic
-        Toast.makeText(this, "Selected: " + option.getText(), Toast.LENGTH_SHORT).show();
+    private void handleOptionClick(Button option, boolean isCorrect) {
+//        option.setBackgroundResource(isCorrect ? R.drawable.correct_option_background : R.drawable.incorrect_option_background);
+        String message = isCorrect ? "Correct!" : "Incorrect. Try again.";
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    private void showOptionsMenu() {
-        PopupMenu popup = new PopupMenu(this, findViewById(R.id.menuButton));
+    private void playAudio(String audioUrl) {
+        // TODO: Implement audio playback
+        Toast.makeText(this, "Playing audio: " + audioUrl, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showOptionsMenu(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
         popup.getMenuInflater().inflate(R.menu.quiz_view_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.menu_edit) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_edit) {
                 editQuiz();
                 return true;
-            }
-            if (item.getItemId() == R.id.menu_share) {
+            } else if (itemId == R.id.menu_share) {
                 shareQuiz();
                 return true;
-            }
-            if (item.getItemId() == R.id.menu_delete) {
+            } else if (itemId == R.id.menu_delete) {
                 deleteQuiz();
                 return true;
             }
-            return true;
+            return false;
         });
         popup.show();
     }
 
     private void editQuiz() {
-        // Implement edit functionality
-        Toast.makeText(this, "Edit quiz", Toast.LENGTH_SHORT).show();
         Intent editIntent = new Intent(this, QuizEditActivity.class);
-        editIntent.putExtra("QUIZ_ID", quiz.getId());
+        editIntent.putExtra("QUIZ_ID", quizId);
         startActivity(editIntent);
     }
 
     private void shareQuiz() {
-        // Implement share functionality
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this quiz!");
@@ -158,21 +210,28 @@ public class QuizViewActivity extends AppCompatActivity {
     }
 
     private void deleteQuiz() {
-        // Implement delete functionality
         new AlertDialog.Builder(this)
                 .setTitle("Delete Quiz")
                 .setMessage("Are you sure you want to delete this quiz?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    // Perform deletion from Firebase
-
+                    db.collection("quizzes").document(quizId)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Quiz deleted successfully", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Error deleting quiz: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void startStudyMode() {
-        // TODO: Implement study mode
-        Toast.makeText(this, "Starting study mode...", Toast.LENGTH_SHORT).show();
+//        Intent studyIntent = new Intent(this, QuizStudyActivity.class);
+//        studyIntent.putExtra("QUIZ_ID", quizId);
+//        startActivity(studyIntent);
     }
 }
 
