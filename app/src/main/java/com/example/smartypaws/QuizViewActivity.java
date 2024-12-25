@@ -16,8 +16,10 @@ import androidx.appcompat.widget.PopupMenu;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +32,7 @@ public class QuizViewActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String quizId;
     private String quizTitle;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class QuizViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quiz_view);
 
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         // Get quiz ID from intent
         quizId = getIntent().getStringExtra("QUIZ_ID");
@@ -53,15 +57,16 @@ public class QuizViewActivity extends AppCompatActivity {
         studyButton.setOnClickListener(v -> startStudyMode());
 
         // Load quiz data
-        loadQuizData();
+        loadQuizData(quizId);
     }
 
-    private void loadQuizData() {
+    private void loadQuizData(String id) {
         db.collection("quizzes").document(quizId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     quiz = documentSnapshot.toObject(Quiz.class);
                     if (quiz != null) {
+                        quiz.setId(id);
                         displayQuizData();
                         updateLastAccessed();
                     } else {
@@ -89,7 +94,16 @@ public class QuizViewActivity extends AppCompatActivity {
         // Set quiz date
         TextView quizDateTextView = findViewById(R.id.quizDateTextView);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
-        quizDateTextView.setText(dateFormat.format(new Date(quiz.getDate())));
+        String createdAt = quiz.getCreatedAt(); // Assuming this is a String
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        try {
+            Date date = inputDateFormat.parse(createdAt);
+            quizDateTextView.setText(dateFormat.format(date)); // Format to "dd MMMM yyyy"
+        } catch (ParseException e) {
+            e.printStackTrace();
+            quizDateTextView.setText("Invalid Date");
+        }
+
 
         // Set quiz description
         TextView quizDescriptionTextView = findViewById(R.id.quizDescriptionTextView);
@@ -137,13 +151,17 @@ public class QuizViewActivity extends AppCompatActivity {
 
         // Add options dynamically
         for (Quiz.Question.Option option : question.getOptions()) {
-            Button optionButton = (Button) getLayoutInflater().inflate(R.layout.item_option, optionsContainer, false);
+            // Inflate the item_option layout (LinearLayout)
+            View optionView = getLayoutInflater().inflate(R.layout.item_option, optionsContainer, false);
+
+            // Get the button inside the inflated layout
+            Button optionButton = optionView.findViewById(R.id.optionButton);
             optionButton.setText(option.getText());
             optionButton.setOnClickListener(v -> handleOptionClick(optionButton, option.isCorrect()));
-            optionsContainer.addView(optionButton);
+            optionsContainer.addView(optionView);
 
-            // Load option image if available
-            ImageView optionImageView = optionButton.findViewById(R.id.optionImageView);
+            // Get the option image view inside the inflated layout
+            ImageView optionImageView = optionView.findViewById(R.id.optionImageView);
             if (option.getImageUrl() != null && !option.getImageUrl().isEmpty()) {
                 optionImageView.setVisibility(View.VISIBLE);
                 Glide.with(this).load(option.getImageUrl()).into(optionImageView);
@@ -151,8 +169,8 @@ public class QuizViewActivity extends AppCompatActivity {
                 optionImageView.setVisibility(View.GONE);
             }
 
-            // Add audio button for option if available
-            Button optionAudioButton = optionButton.findViewById(R.id.optionAudioButton);
+            // Add the audio button if needed
+            Button optionAudioButton = optionView.findViewById(R.id.optionAudioButton);
             if (option.getAudioUrl() != null && !option.getAudioUrl().isEmpty()) {
                 optionAudioButton.setVisibility(View.VISIBLE);
                 optionAudioButton.setOnClickListener(v -> playAudio(option.getAudioUrl()));
@@ -214,19 +232,25 @@ public class QuizViewActivity extends AppCompatActivity {
                 .setTitle("Delete Quiz")
                 .setMessage("Are you sure you want to delete this quiz?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    db.collection("quizzes").document(quizId)
-                            .delete()
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(this, "Quiz deleted successfully", Toast.LENGTH_SHORT).show();
-                                finish();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Error deleting quiz: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
+                    String currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "";
+                    if (quiz.getUserId().equals(currentUserId)) {
+                        db.collection("quizzes").document(quizId)
+                                .delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(this, "Quiz deleted successfully", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Error deleting quiz: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                        Toast.makeText(this, "You don't have permission to delete this quiz", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     private void startStudyMode() {
 //        Intent studyIntent = new Intent(this, QuizStudyActivity.class);

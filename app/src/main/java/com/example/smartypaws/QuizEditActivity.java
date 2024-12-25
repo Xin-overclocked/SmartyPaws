@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -21,6 +22,7 @@ import androidx.cardview.widget.CardView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -39,6 +41,7 @@ public class QuizEditActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseStorage storage;
     private StorageReference storageRef;
+    private FirebaseAuth auth;
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
@@ -46,6 +49,7 @@ public class QuizEditActivity extends AppCompatActivity {
 
     private View currentQuestionView;
     private View currentOptionView;
+    private String quizId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +59,25 @@ public class QuizEditActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
+        auth = FirebaseAuth.getInstance();
+
+        // Retrieve the quiz ID from the Intent
+        quizId = getIntent().getStringExtra("QUIZ_ID");
+
+        // Display today's date
+        TextView dateTextView = findViewById(R.id.dateText);
+        String currentDate = new SimpleDateFormat("dd-MMMM-yyyy", Locale.getDefault()).format(new Date());
+        dateTextView.setText(currentDate);
 
         quizItemsContainer = findViewById(R.id.quizItemsContainer);
 
         // Add initial quiz item
         addQuizItem();
+
+        // Fetch the quiz data if editing an existing quiz
+        if (quizId != null) {
+            loadQuizData(quizId);
+        }
 
         // Setup back button
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
@@ -73,6 +91,58 @@ public class QuizEditActivity extends AppCompatActivity {
         findViewById(R.id.createFromFlashcardButton).setOnClickListener(v -> {
             // Implement create quiz from flashcard functionality
         });
+    }
+
+    private void loadQuizData(String quizId) {
+        db.collection("quizzes").document(quizId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Quiz quiz = documentSnapshot.toObject(Quiz.class);
+
+                        if (quiz != null) {
+                            // Populate the UI fields with the quiz data
+                            EditText titleEditText = findViewById(R.id.titleEditText);
+                            EditText descriptionEditText = findViewById(R.id.descriptionEditText);
+                            titleEditText.setText(quiz.getTitle());
+                            descriptionEditText.setText(quiz.getDescription());
+
+                            // Load questions and options (if available)
+                            loadQuizQuestions(quiz.getQuestions());
+                        }
+                    } else {
+                        Toast.makeText(QuizEditActivity.this, "Quiz not found.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(QuizEditActivity.this, "Error loading quiz data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void loadQuizQuestions(List<Quiz.Question> questions) {
+        for (Quiz.Question question : questions) {
+            View questionView = getLayoutInflater().inflate(R.layout.item_quiz_edit, quizItemsContainer, false);
+
+            // Set the question text
+            EditText questionEditText = questionView.findViewById(R.id.questionEditText);
+            questionEditText.setText(question.getText());
+
+            // Load options for this question
+            LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);
+            for (Quiz.Question.Option option : question.getOptions()) {
+                View optionView = getLayoutInflater().inflate(R.layout.item_quiz_option, optionsContainer, false);
+
+                EditText optionEditText = optionView.findViewById(R.id.optionEditText);
+                optionEditText.setText(option.getText());
+
+                CheckBox correctCheckBox = optionView.findViewById(R.id.correctCheckBox);
+                correctCheckBox.setChecked(option.isCorrect());
+
+                optionsContainer.addView(optionView);
+            }
+
+            quizItemsContainer.addView(questionView);
+        }
     }
 
     private void addQuizItem() {
@@ -286,14 +356,31 @@ public class QuizEditActivity extends AppCompatActivity {
         // Create Timestamp for lastAccessed
         Timestamp lastAccessed = Timestamp.now();
 
-        Quiz quiz = new Quiz(title, description, createdAt, lastAccessed, questions);
+        // Get the current user's ID
+        String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "";
+//        if (userId.isEmpty()) {
+//            Toast.makeText(this, "Error: User not authenticated", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+
+        Quiz quiz = new Quiz(userId, title, description, createdAt, lastAccessed, questions);
 
         // Save to Firestore
-        db.collection("quiz")
+        db.collection("quizzes")
                 .add(quiz)
                 .addOnSuccessListener(documentReference -> {
                     String quizId = documentReference.getId();
-                    showSaveSuccessDialog(quizId, title);
+                    quiz.setId(quizId);
+
+                    // Update the document with the new ID
+                    db.collection("quizzes").document(quizId)
+                            .set(quiz)
+                            .addOnSuccessListener(aVoid -> {
+                                showSaveSuccessDialog(quizId, title);
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Error updating quiz with ID: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error saving quiz: " + e.getMessage(), Toast.LENGTH_SHORT).show();
