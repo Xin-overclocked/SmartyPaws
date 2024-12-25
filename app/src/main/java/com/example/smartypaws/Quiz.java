@@ -3,7 +3,7 @@ package com.example.smartypaws;
 import com.google.firebase.Timestamp;
 import java.util.List;
 
-public class Quiz {
+public class Quiz implements StudyItem  {
     private String id;
     private String userId;
     private String title;
@@ -23,6 +23,12 @@ public class Quiz {
         this.createdAt = createdAt;
         this.lastAccessed = lastAccessed;
         this.questions = questions;
+    }
+
+    public Quiz(String id, String title, String description) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
     }
 
     // Getters and setters
