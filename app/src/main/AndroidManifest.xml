@@ -13,14 +13,24 @@
         android:theme="@style/Theme.SmartyPaws"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".FlashcardEditActivity" />
+        <activity android:name=".FlashcardViewActivity" />
+        <activity android:name=".FlashcardStudyActivity" />
+        <activity android:name=".QuizEditActivity" />
+        <activity android:name=".QuizViewActivity" />
+        <activity android:name=".EditProfileActivity" />
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".FeedbackActivity" />
     </application>
 
 </manifest>
