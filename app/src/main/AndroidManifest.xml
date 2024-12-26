@@ -37,6 +37,7 @@
         <activity android:name=".NotificationActivity" />
         <receiver android:name=".NotificationReceiver" />
 
+
     </application>
 
 </manifest>

@@ -3,9 +3,14 @@ package com.example.smartypaws;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 
@@ -15,6 +20,15 @@ public class SettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
+
+        // Set initial value of TVSelectedSize
+        SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
+        String textSize = sharedPreferences.getString("TextSize", "Medium"); // Default to "Medium"
+
+        TextView tvSelectedSize = findViewById(R.id.TVSelectedSize);
+        if (tvSelectedSize != null) {
+            tvSelectedSize.setText("Selected Size: " + textSize);
+        }
 
         setupViews();
     }
@@ -76,7 +90,7 @@ public class SettingActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void showTextSizeDialog() {
+    /*private void showTextSizeDialog() {
         String[] sizes = {"Small", "Medium", "Large"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Text Size")
@@ -86,7 +100,35 @@ public class SettingActivity extends AppCompatActivity {
                     // Update app's text size
                 })
                 .show();
+    }*/
+    private void showTextSizeDialog() {
+        String[] sizes = {"Small", "Medium", "Large"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Text Size")
+                .setItems(sizes, (dialog, which) -> {
+                    String selectedSize = sizes[which];
+
+                    // Save selected size in SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("TextSize", selectedSize);
+                    editor.apply();
+
+                    // Update the selected size TextView (TVSelectedSize)
+                    TextView tvSelectedSize = findViewById(R.id.TVSelectedSize);
+                    if (tvSelectedSize != null) {
+                        tvSelectedSize.setText("Selected Size: " + selectedSize);
+                    }
+
+                    // Show a toast to confirm selection
+                    Toast.makeText(this, "Text size set to " + selectedSize, Toast.LENGTH_SHORT).show();
+
+                    recreate();
+                })
+                .show();
     }
+
+
 
     private void openChangePassword() {
         // TODO: Implement change password activity
@@ -111,6 +153,11 @@ public class SettingActivity extends AppCompatActivity {
         // 1. Clear user data
         // 2. Sign out
         // 3. Return to login screen
+        Toast.makeText(this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, LoginActivity.class); // Replace with your login activity
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 }
 

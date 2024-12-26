@@ -20,13 +20,14 @@
             android:contentDescription="Back"/>
 
         <TextView
+            android:id="@+id/TVSetting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="Settings"
-            android:textSize="20sp"
             android:textColor="@color/black"
-            android:textStyle="bold"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <!-- Settings Options -->
@@ -111,7 +112,7 @@
                 android:focusable="true">
 
                 <RelativeLayout
-                    android:layout_width=" match_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
@@ -123,12 +124,13 @@
                         android:textSize="16sp"/>
 
                     <TextView
+                        android:id="@+id/TVSelectedSize"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:text="Medium"
                         android:textColor="@color/black"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
