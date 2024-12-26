@@ -72,7 +72,13 @@
                 android:layout_height="wrap_content"
                 android:text="Test Notification" />
 
-            <!--on below line we are creating a text view-->
+            <!-- Time Picker -->
+            <TimePicker
+                android:id="@+id/timePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:timePickerMode="spinner"/>
 
         </LinearLayout>
 
@@ -80,13 +86,13 @@
 
     <!-- Submit Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/resetButton"
+        android:id="@+id/setButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:backgroundTint="@color/light_purple"
         android:padding="16dp"
-        android:text="Reset"
+        android:text="Set"
         android:textColor="@color/black" />
 
 </LinearLayout>

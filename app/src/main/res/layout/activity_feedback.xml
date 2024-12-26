@@ -87,7 +87,7 @@
 
     <!-- Submit Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/resetButton"
+        android:id="@+id/setButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Submit"
