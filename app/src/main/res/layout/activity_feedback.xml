@@ -37,14 +37,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
         android:text="Feedback"
         android:textColor="@color/white"
         android:textSize="32sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp"/>
+        android:textStyle="bold" />
 
     <!-- Feedback Card -->
     <androidx.cardview.widget.CardView
