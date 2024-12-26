@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 public class SettingActivity extends AppCompatActivity {
@@ -25,6 +24,10 @@ public class SettingActivity extends AppCompatActivity {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> finish());
 
+        // Notification Settings
+        CardView notificationCard = findViewById(R.id.notificationCard);
+        notificationCard.setOnClickListener(v -> openNotificationSettings());
+
         // Leave a Review
         CardView leaveReviewCard = findViewById(R.id.leaveReviewCard);
         leaveReviewCard.setOnClickListener(v -> openPlayStoreReview());
@@ -38,11 +41,20 @@ public class SettingActivity extends AppCompatActivity {
         textSizeCard.setOnClickListener(v -> showTextSizeDialog());
 
         // Change Password
-        CardView changePasswordCard = findViewById(R.id.changePasswordCard);
-        changePasswordCard.setOnClickListener(v -> openChangePassword());
+        // TODO: Implement change password functionality
+        /*CardView changePasswordCard = findViewById(R.id.changePasswordCard);
+        changePasswordCard.setOnClickListener(v -> openChangePassword());*/
 
         // Delete Account
         findViewById(R.id.deleteAccountButton).setOnClickListener(v -> showDeleteAccountDialog());
+    }
+
+    private void openNotificationSettings(){
+        // TODO: Implement notification settings activity
+        Intent intent = new Intent(this, NotificationActivity.class);
+        startActivity(intent);
+
+
     }
 
     private void openPlayStoreReview() {

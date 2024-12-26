@@ -17,7 +17,7 @@ public class FeedbackActivity extends AppCompatActivity {
 
         // Initialize views
         feedbackEditText = findViewById(R.id.feedbackEditText);
-        Button submitButton = findViewById(R.id.submitButton);
+        Button submitButton = findViewById(R.id.resetButton);
         ImageButton backButton = findViewById(R.id.backButton);
 
         // Set click listeners
