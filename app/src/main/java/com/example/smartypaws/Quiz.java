@@ -56,8 +56,8 @@ public class Quiz implements StudyItem  {
     public static class Question {
         private String text;
         private List<Option> options;
-        private String imageUrl;
-        private String audioUrl;
+//        private String imageUrl;
+//        private String audioUrl;
 
         public Question() {
             // Default constructor required for Firestore
@@ -66,8 +66,8 @@ public class Quiz implements StudyItem  {
         public Question(String text, List<Option> options, String imageUrl, String audioUrl) {
             this.text = text;
             this.options = options;
-            this.imageUrl = imageUrl;
-            this.audioUrl = audioUrl;
+//            this.imageUrl = imageUrl;
+//            this.audioUrl = audioUrl;
         }
 
         // Getters and setters
@@ -77,17 +77,17 @@ public class Quiz implements StudyItem  {
         public List<Option> getOptions() { return options; }
         public void setOptions(List<Option> options) { this.options = options; }
 
-        public String getImageUrl() { return imageUrl; }
-        public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
-        public String getAudioUrl() { return audioUrl; }
-        public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
+//        public String getImageUrl() { return imageUrl; }
+//        public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+//
+//        public String getAudioUrl() { return audioUrl; }
+//        public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
 
         public static class Option {
             private String text;
             private boolean isCorrect;
-            private String imageUrl;
-            private String audioUrl;
+//            private String imageUrl;
+//            private String audioUrl;
 
             public Option() {
                 // Default constructor required for Firestore
@@ -96,8 +96,8 @@ public class Quiz implements StudyItem  {
             public Option(String text, boolean isCorrect, String imageUrl, String audioUrl) {
                 this.text = text;
                 this.isCorrect = isCorrect;
-                this.imageUrl = imageUrl;
-                this.audioUrl = audioUrl;
+//                this.imageUrl = imageUrl;
+//                this.audioUrl = audioUrl;
             }
 
             // Getters and setters
@@ -107,11 +107,11 @@ public class Quiz implements StudyItem  {
             public boolean isCorrect() { return isCorrect; }
             public void setCorrect(boolean correct) { isCorrect = correct; }
 
-            public String getImageUrl() { return imageUrl; }
-            public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
-            public String getAudioUrl() { return audioUrl; }
-            public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
+//            public String getImageUrl() { return imageUrl; }
+//            public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+//
+//            public String getAudioUrl() { return audioUrl; }
+//            public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
         }
     }
 }

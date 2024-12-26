@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -326,6 +327,11 @@ public class QuizEditActivity extends AppCompatActivity {
             LinearLayout optionsContainer = quizItem.findViewById(R.id.optionsContainer);
             List<Quiz.Question.Option> options = new ArrayList<>();
 
+            if (!isAtLeastOneOptionChecked(optionsContainer)) {
+                Toast.makeText(this, "Please mark at least one option as correct for each question", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             for (int j = 0; j < optionsContainer.getChildCount(); j++) {
                 View optionView = optionsContainer.getChildAt(j);
 
@@ -393,7 +399,16 @@ public class QuizEditActivity extends AppCompatActivity {
                 });
     }
 
-
+    private boolean isAtLeastOneOptionChecked(LinearLayout optionsContainer) {
+        for (int i = 0; i < optionsContainer.getChildCount(); i++) {
+            View optionView = optionsContainer.getChildAt(i);
+            CheckBox correctCheckBox = optionView.findViewById(R.id.correctCheckBox);
+            if (correctCheckBox.isChecked()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void showSaveSuccessDialog(String quizId, String quizTitle) {
         Dialog dialog = new Dialog(this);
@@ -513,9 +528,7 @@ public class QuizEditActivity extends AppCompatActivity {
         ));
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        // Use a library like Glide or Picasso to load the image
-        // For simplicity, we're not implementing image loading here
-        // Glide.with(this).load(imageUrl).into(imageView);
+         Glide.with(this).load(imageUrl).into(imageView);
 
         if (currentQuestionView != null) {
             ((LinearLayout) currentQuestionView).addView(imageView, 1); // Add after question text
