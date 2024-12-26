@@ -113,10 +113,11 @@ public class QuizViewActivity extends AppCompatActivity {
         TextView questionsCountTextView = findViewById(R.id.questionsCountTextView);
         questionsCountTextView.setText(quiz.getQuestions().size() + " questions");
 
-        // Add questions
         questionsContainer.removeAllViews();
-        for (int i = 0; i < quiz.getQuestions().size(); i++) {
-            addQuestionView(i + 1, quiz.getQuestions().get(i));
+        List<Quiz.Question> questions = quiz.getQuestions();
+        for (int i = 0; i < questions.size(); i++) {
+            Quiz.Question question = questions.get(i);
+            addQuestionView(i + 1, question);
         }
     }
 
@@ -137,13 +138,13 @@ public class QuizViewActivity extends AppCompatActivity {
         }
 
         // Add audio button if available
-        Button audioButton = questionView.findViewById(R.id.audioButton);
-        if (question.getAudioUrl() != null && !question.getAudioUrl().isEmpty()) {
-            audioButton.setVisibility(View.VISIBLE);
-            audioButton.setOnClickListener(v -> playAudio(question.getAudioUrl()));
-        } else {
-            audioButton.setVisibility(View.GONE);
-        }
+//        Button audioButton = questionView.findViewById(R.id.audioButton);
+//        if (question.getAudioUrl() != null && !question.getAudioUrl().isEmpty()) {
+//            audioButton.setVisibility(View.VISIBLE);
+//            audioButton.setOnClickListener(v -> playAudio(question.getAudioUrl()));
+//        } else {
+//            audioButton.setVisibility(View.GONE);
+//        }
 
         // Get the options container
         LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);

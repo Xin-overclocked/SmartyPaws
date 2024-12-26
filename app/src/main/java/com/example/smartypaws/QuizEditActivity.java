@@ -71,12 +71,12 @@ public class QuizEditActivity extends AppCompatActivity {
 
         quizItemsContainer = findViewById(R.id.quizItemsContainer);
 
-        // Add initial quiz item
-        addQuizItem();
-
         // Fetch the quiz data if editing an existing quiz
         if (quizId != null) {
             loadQuizData(quizId);
+        } else {
+            // Add initial quiz item
+            addQuizItem();
         }
 
         // Setup back button
@@ -107,7 +107,7 @@ public class QuizEditActivity extends AppCompatActivity {
                             titleEditText.setText(quiz.getTitle());
                             descriptionEditText.setText(quiz.getDescription());
 
-                            // Load questions and options (if available)
+                            // Load questions and options
                             loadQuizQuestions(quiz.getQuestions());
                         }
                     } else {
@@ -120,6 +120,7 @@ public class QuizEditActivity extends AppCompatActivity {
     }
 
     private void loadQuizQuestions(List<Quiz.Question> questions) {
+        quizItemsContainer.removeAllViews(); // Clear existing views
         for (Quiz.Question question : questions) {
             View questionView = getLayoutInflater().inflate(R.layout.item_quiz_edit, quizItemsContainer, false);
 
@@ -129,6 +130,7 @@ public class QuizEditActivity extends AppCompatActivity {
 
             // Load options for this question
             LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);
+            optionsContainer.removeAllViews(); // Clear default options
             for (Quiz.Question.Option option : question.getOptions()) {
                 View optionView = getLayoutInflater().inflate(R.layout.item_quiz_option, optionsContainer, false);
 
@@ -138,9 +140,11 @@ public class QuizEditActivity extends AppCompatActivity {
                 CheckBox correctCheckBox = optionView.findViewById(R.id.correctCheckBox);
                 correctCheckBox.setChecked(option.isCorrect());
 
+                setupOptionListeners(optionView, optionsContainer);
                 optionsContainer.addView(optionView);
             }
 
+            setupQuizItemListeners(questionView);
             quizItemsContainer.addView(questionView);
         }
     }
@@ -188,6 +192,8 @@ public class QuizEditActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(v -> {
             if (quizItemsContainer.getChildCount() > 1) {
                 quizItemsContainer.removeView(itemView);
+            } else {
+                Toast.makeText(QuizEditActivity.this, "Cannot delete the last question.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -287,8 +293,8 @@ public class QuizEditActivity extends AppCompatActivity {
         optionEditText.setHint("Option " + (optionsContainer.getChildCount() + 1));
 
         setupOptionListeners(optionView, optionsContainer);
-        updateOptionHints(optionsContainer);
         optionsContainer.addView(optionView);
+        updateOptionHints(optionsContainer);
     }
 
     private void saveQuiz() {
