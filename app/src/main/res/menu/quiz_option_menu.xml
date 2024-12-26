@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/option_add_image"
-        android:title="Add Image"/>
-    <item
-        android:id="@+id/option_add_recording"
-        android:title="Add Recording"/>
+<!--    <item-->
+<!--        android:id="@+id/option_add_image"-->
+<!--        android:title="Add Image"/>-->
+<!--    <item-->
+<!--        android:id="@+id/option_add_recording"-->
+<!--        android:title="Add Recording"/>-->
     <item
         android:id="@+id/option_delete"
         android:title="Delete Option"/>

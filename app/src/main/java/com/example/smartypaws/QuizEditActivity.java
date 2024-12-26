@@ -231,15 +231,16 @@ public class QuizEditActivity extends AppCompatActivity {
 
         popup.setOnMenuItemClickListener(item -> {
             int itemId = item.getItemId();
-            if (itemId == R.id.question_add_image) {
-                currentQuestionView = questionView;
-                showImagePickerDialog();
-                return true;
-            } else if (itemId == R.id.question_add_recording) {
-                currentQuestionView = questionView;
-                startAudioRecording();
-                return true;
-            } else if (itemId == R.id.question_add_option) {
+//            if (itemId == R.id.question_add_image) {
+//                currentQuestionView = questionView;
+//                showImagePickerDialog();
+//                return true;
+//            } else if (itemId == R.id.question_add_recording) {
+//                currentQuestionView = questionView;
+//                startAudioRecording();
+//                return true;
+//            } else
+            if (itemId == R.id.question_add_option) {
                 addNewOption(optionsContainer);
                 return true;
             }
@@ -258,15 +259,16 @@ public class QuizEditActivity extends AppCompatActivity {
 
         popup.setOnMenuItemClickListener(item -> {
             int itemId = item.getItemId();
-            if (itemId == R.id.option_add_image) {
-                currentOptionView = optionView;
-                showImagePickerDialog();
-                return true;
-            } else if (itemId == R.id.option_add_recording) {
-                currentOptionView = optionView;
-                startAudioRecording();
-                return true;
-            } else if (itemId == R.id.option_delete) {
+//            if (itemId == R.id.option_add_image) {
+//                currentOptionView = optionView;
+//                showImagePickerDialog();
+//                return true;
+//            } else if (itemId == R.id.option_add_recording) {
+//                currentOptionView = optionView;
+//                startAudioRecording();
+//                return true;
+//            } else
+            if (itemId == R.id.option_delete) {
                 if (optionsContainer.getChildCount() > 2) {
                     optionsContainer.removeView(optionView);
                     updateOptionHints(optionsContainer);
