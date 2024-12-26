@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,12 +72,12 @@ public class QuizEditActivity extends AppCompatActivity {
 
         quizItemsContainer = findViewById(R.id.quizItemsContainer);
 
-        // Add initial quiz item
-        addQuizItem();
-
         // Fetch the quiz data if editing an existing quiz
         if (quizId != null) {
             loadQuizData(quizId);
+        } else {
+            // Add initial quiz item
+            addQuizItem();
         }
 
         // Setup back button
@@ -107,7 +108,7 @@ public class QuizEditActivity extends AppCompatActivity {
                             titleEditText.setText(quiz.getTitle());
                             descriptionEditText.setText(quiz.getDescription());
 
-                            // Load questions and options (if available)
+                            // Load questions and options
                             loadQuizQuestions(quiz.getQuestions());
                         }
                     } else {
@@ -120,6 +121,7 @@ public class QuizEditActivity extends AppCompatActivity {
     }
 
     private void loadQuizQuestions(List<Quiz.Question> questions) {
+        quizItemsContainer.removeAllViews(); // Clear existing views
         for (Quiz.Question question : questions) {
             View questionView = getLayoutInflater().inflate(R.layout.item_quiz_edit, quizItemsContainer, false);
 
@@ -129,6 +131,7 @@ public class QuizEditActivity extends AppCompatActivity {
 
             // Load options for this question
             LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);
+            optionsContainer.removeAllViews(); // Clear default options
             for (Quiz.Question.Option option : question.getOptions()) {
                 View optionView = getLayoutInflater().inflate(R.layout.item_quiz_option, optionsContainer, false);
 
@@ -138,9 +141,11 @@ public class QuizEditActivity extends AppCompatActivity {
                 CheckBox correctCheckBox = optionView.findViewById(R.id.correctCheckBox);
                 correctCheckBox.setChecked(option.isCorrect());
 
+                setupOptionListeners(optionView, optionsContainer);
                 optionsContainer.addView(optionView);
             }
 
+            setupQuizItemListeners(questionView);
             quizItemsContainer.addView(questionView);
         }
     }
@@ -188,6 +193,8 @@ public class QuizEditActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(v -> {
             if (quizItemsContainer.getChildCount() > 1) {
                 quizItemsContainer.removeView(itemView);
+            } else {
+                Toast.makeText(QuizEditActivity.this, "Cannot delete the last question.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -287,8 +294,8 @@ public class QuizEditActivity extends AppCompatActivity {
         optionEditText.setHint("Option " + (optionsContainer.getChildCount() + 1));
 
         setupOptionListeners(optionView, optionsContainer);
-        updateOptionHints(optionsContainer);
         optionsContainer.addView(optionView);
+        updateOptionHints(optionsContainer);
     }
 
     private void saveQuiz() {
@@ -319,6 +326,11 @@ public class QuizEditActivity extends AppCompatActivity {
             // Collect options for the question
             LinearLayout optionsContainer = quizItem.findViewById(R.id.optionsContainer);
             List<Quiz.Question.Option> options = new ArrayList<>();
+
+            if (!isAtLeastOneOptionChecked(optionsContainer)) {
+                Toast.makeText(this, "Please mark at least one option as correct for each question", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             for (int j = 0; j < optionsContainer.getChildCount(); j++) {
                 View optionView = optionsContainer.getChildAt(j);
@@ -387,7 +399,16 @@ public class QuizEditActivity extends AppCompatActivity {
                 });
     }
 
-
+    private boolean isAtLeastOneOptionChecked(LinearLayout optionsContainer) {
+        for (int i = 0; i < optionsContainer.getChildCount(); i++) {
+            View optionView = optionsContainer.getChildAt(i);
+            CheckBox correctCheckBox = optionView.findViewById(R.id.correctCheckBox);
+            if (correctCheckBox.isChecked()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void showSaveSuccessDialog(String quizId, String quizTitle) {
         Dialog dialog = new Dialog(this);
@@ -507,9 +528,7 @@ public class QuizEditActivity extends AppCompatActivity {
         ));
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        // Use a library like Glide or Picasso to load the image
-        // For simplicity, we're not implementing image loading here
-        // Glide.with(this).load(imageUrl).into(imageView);
+         Glide.with(this).load(imageUrl).into(imageView);
 
         if (currentQuestionView != null) {
             ((LinearLayout) currentQuestionView).addView(imageView, 1); // Add after question text

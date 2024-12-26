@@ -113,10 +113,11 @@ public class QuizViewActivity extends AppCompatActivity {
         TextView questionsCountTextView = findViewById(R.id.questionsCountTextView);
         questionsCountTextView.setText(quiz.getQuestions().size() + " questions");
 
-        // Add questions
         questionsContainer.removeAllViews();
-        for (int i = 0; i < quiz.getQuestions().size(); i++) {
-            addQuestionView(i + 1, quiz.getQuestions().get(i));
+        List<Quiz.Question> questions = quiz.getQuestions();
+        for (int i = 0; i < questions.size(); i++) {
+            Quiz.Question question = questions.get(i);
+            addQuestionView(i + 1, question);
         }
     }
 
@@ -128,22 +129,22 @@ public class QuizViewActivity extends AppCompatActivity {
         questionTextView.setText(question.getText());
 
         // Load question image if available
-        ImageView questionImageView = questionView.findViewById(R.id.questionImageView);
-        if (question.getImageUrl() != null && !question.getImageUrl().isEmpty()) {
-            questionImageView.setVisibility(View.VISIBLE);
-            Glide.with(this).load(question.getImageUrl()).into(questionImageView);
-        } else {
-            questionImageView.setVisibility(View.GONE);
-        }
+//        ImageView questionImageView = questionView.findViewById(R.id.questionImageView);
+//        if (question.getImageUrl() != null && !question.getImageUrl().isEmpty()) {
+//            questionImageView.setVisibility(View.VISIBLE);
+//            Glide.with(this).load(question.getImageUrl()).into(questionImageView);
+//        } else {
+//            questionImageView.setVisibility(View.GONE);
+//        }
 
         // Add audio button if available
-        Button audioButton = questionView.findViewById(R.id.audioButton);
-        if (question.getAudioUrl() != null && !question.getAudioUrl().isEmpty()) {
-            audioButton.setVisibility(View.VISIBLE);
-            audioButton.setOnClickListener(v -> playAudio(question.getAudioUrl()));
-        } else {
-            audioButton.setVisibility(View.GONE);
-        }
+//        Button audioButton = questionView.findViewById(R.id.audioButton);
+//        if (question.getAudioUrl() != null && !question.getAudioUrl().isEmpty()) {
+//            audioButton.setVisibility(View.VISIBLE);
+//            audioButton.setOnClickListener(v -> playAudio(question.getAudioUrl()));
+//        } else {
+//            audioButton.setVisibility(View.GONE);
+//        }
 
         // Get the options container
         LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);
@@ -161,22 +162,22 @@ public class QuizViewActivity extends AppCompatActivity {
             optionsContainer.addView(optionView);
 
             // Get the option image view inside the inflated layout
-            ImageView optionImageView = optionView.findViewById(R.id.optionImageView);
-            if (option.getImageUrl() != null && !option.getImageUrl().isEmpty()) {
-                optionImageView.setVisibility(View.VISIBLE);
-                Glide.with(this).load(option.getImageUrl()).into(optionImageView);
-            } else {
-                optionImageView.setVisibility(View.GONE);
-            }
+//            ImageView optionImageView = optionView.findViewById(R.id.optionImageView);
+//            if (option.getImageUrl() != null && !option.getImageUrl().isEmpty()) {
+//                optionImageView.setVisibility(View.VISIBLE);
+//                Glide.with(this).load(option.getImageUrl()).into(optionImageView);
+//            } else {
+//                optionImageView.setVisibility(View.GONE);
+//            }
 
             // Add the audio button if needed
-            Button optionAudioButton = optionView.findViewById(R.id.optionAudioButton);
-            if (option.getAudioUrl() != null && !option.getAudioUrl().isEmpty()) {
-                optionAudioButton.setVisibility(View.VISIBLE);
-                optionAudioButton.setOnClickListener(v -> playAudio(option.getAudioUrl()));
-            } else {
-                optionAudioButton.setVisibility(View.GONE);
-            }
+//            Button optionAudioButton = optionView.findViewById(R.id.optionAudioButton);
+//            if (option.getAudioUrl() != null && !option.getAudioUrl().isEmpty()) {
+//                optionAudioButton.setVisibility(View.VISIBLE);
+//                optionAudioButton.setOnClickListener(v -> playAudio(option.getAudioUrl()));
+//            } else {
+//                optionAudioButton.setVisibility(View.GONE);
+//            }
         }
 
         questionsContainer.addView(questionView);

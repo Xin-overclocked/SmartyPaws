@@ -14,34 +14,33 @@
         android:orientation="vertical">
 
         <!-- Question Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:background="@color/light_purple">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:padding="16dp"-->
+<!--            android:background="@color/light_purple">-->
 
-            <TextView
-                android:id="@+id/questionNumberTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Question 1"
-                android:textColor="@color/dark_purple"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+<!--            <TextView-->
+<!--                android:id="@+id/questionNumberTextView"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textColor="@color/dark_purple"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textStyle="bold"/>-->
 
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+<!--            <Space-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1"/>-->
 
-            <Button
-                android:id="@+id/audioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Play Audio"
-                android:visibility="gone"/>
-        </LinearLayout>
+<!--            <Button-->
+<!--                android:id="@+id/audioButton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Play Audio"-->
+<!--                android:visibility="gone"/>-->
+<!--        </LinearLayout>-->
 
         <!-- Question Content -->
         <LinearLayout
