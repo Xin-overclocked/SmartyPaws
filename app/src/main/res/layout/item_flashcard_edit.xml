@@ -5,10 +5,12 @@
     android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        app:cardCornerRadius="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -97,7 +99,7 @@
             android:layout_marginBottom="5dp"
             android:layout_marginEnd="16dp"
             android:src="@drawable/ic_add"
-            android:backgroundTint="@color/light_purple"/>
+            android:backgroundTint="@color/light_purple" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/deleteButton"
@@ -105,6 +107,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:src="@drawable/ic_delete"
-            android:backgroundTint="@color/light_purple"/>
+            android:backgroundTint="@color/light_purple" />
     </LinearLayout>
 </LinearLayout>
