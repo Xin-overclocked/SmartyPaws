@@ -153,16 +153,27 @@
                     android:textSize="16sp"/>
             </androidx.cardview.widget.CardView>
 
+            <!-- Log Out Button -->
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Log out"
+                android:textColor="@color/white"
+                android:backgroundTint="#7948AE"
+                android:padding="16dp"/>
+
             <!-- Delete Account Button -->
             <Button
                 android:id="@+id/deleteAccountButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Delete Account"
-                android:textColor="@color/white"
                 android:backgroundTint="#DE2828"
-                android:padding="16dp"/>
+                android:padding="16dp"
+                android:text="Delete Account"
+                android:textColor="@color/white" />
 
         </LinearLayout>
     </ScrollView>

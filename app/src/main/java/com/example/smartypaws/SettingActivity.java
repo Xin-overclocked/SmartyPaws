@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +30,12 @@ public class SettingActivity extends AppCompatActivity {
         if (tvSelectedSize != null) {
             tvSelectedSize.setText("Selected Size: " + textSize);
         }
+
+        // Initialize the Log Out button
+        Button logoutButton = findViewById(R.id.logoutButton);
+
+        // Set OnClickListener for the Log Out button
+        logoutButton.setOnClickListener(v -> logout());
 
         setupViews();
     }
@@ -159,5 +166,27 @@ public class SettingActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+    // Method to handle log out logic
+    private void logout() {
+        // Clear user session data stored in SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clears all saved preferences related to the session
+        editor.apply();
+
+        // Optionally, you can log the user out of any services (e.g., Firebase, etc.)
+        // Example: FirebaseAuth.getInstance().signOut();
+
+        // Show a Toast message confirming logout
+        Toast.makeText(this, "Logged out successfully.", Toast.LENGTH_SHORT).show();
+
+        // Redirect to the Login Activity after logout
+        Intent intent = new Intent(this, LoginActivity.class); // Make sure LoginActivity exists
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Prevent going back to previous activity
+        startActivity(intent);
+        finish(); // Close the current activity (SettingActivity) to prevent returning to it
+    }
+
 }
 
