@@ -3,6 +3,7 @@ package com.example.smartypaws;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -11,18 +12,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
+    private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recentlyStudiedRecyclerView;
     private RecyclerView myFlashcardsRecyclerView;
     private RecyclerView myQuizzesRecyclerView;
@@ -32,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private CollectionReference quizzesRef;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +46,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firestore instance
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
         quizzesRef = db.collection("quizzes");
+
+        // Setup SwipeRefreshLayout
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            fetchFlashcards();
+            fetchQuizzes();
+            fetchRecentlyStudied();
+            swipeRefreshLayout.setRefreshing(false);
+        });
 
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
@@ -65,8 +81,11 @@ public class MainActivity extends AppCompatActivity {
         myFlashcardsRecyclerView.setAdapter(myFlashcardsAdapter);
         myQuizzesRecyclerView.setAdapter(myQuizzesAdapter);
 
+
         // Fetch quizzes from Firestore
+        fetchFlashcards();
         fetchQuizzes();
+        fetchRecentlyStudied();
 
         // Set up FAB click listener
         FloatingActionButton fab = findViewById(R.id.fabAdd);
@@ -121,6 +140,79 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
     }
+
+    private void fetchFlashcards() {
+        // TODO implement fetch flashcard logic from db
+    }
+
+    private void fetchRecentlyStudied() {
+        String userId = auth.getCurrentUser().getUid();
+        List<StudyItem> recentlyStudiedList = new ArrayList<>();
+
+        // Query for recently studied quizzes
+        db.collection("quizzes")
+                .whereEqualTo("userId", userId)
+                .orderBy("lastAccessed", Query.Direction.DESCENDING)
+                .limit(5)
+                .get()
+                .addOnSuccessListener(quizSnapshots -> {
+                    for (QueryDocumentSnapshot document : quizSnapshots) {
+                        Quiz quiz = document.toObject(Quiz.class);
+                        recentlyStudiedList.add(quiz);
+                    }
+                    fetchFlashcardsForRecentlyStudied(recentlyStudiedList);
+                })
+                .addOnFailureListener(e -> {
+                    // If quizzes fail to load, proceed with fetching flashcards
+                    fetchFlashcardsForRecentlyStudied(recentlyStudiedList);
+                });
+    }
+
+    private void fetchFlashcardsForRecentlyStudied(List<StudyItem> recentlyStudiedList) {
+        String userId = auth.getCurrentUser().getUid();
+        db.collection("flashcards")
+                .whereEqualTo("userId", userId)
+                .orderBy("lastAccessed", Query.Direction.DESCENDING)
+                .limit(5)
+                .get()
+                .addOnSuccessListener(flashcardSnapshots -> {
+                    for (QueryDocumentSnapshot document : flashcardSnapshots) {
+                        FlashcardSet flashcardSet = document.toObject(FlashcardSet.class);
+                        recentlyStudiedList.add(flashcardSet);
+                    }
+                    finalizeRecentlyStudiedList(recentlyStudiedList);
+                })
+                .addOnFailureListener(e -> {
+                    // If flashcards fail to load, proceed with what we have
+                    finalizeRecentlyStudiedList(recentlyStudiedList);
+                });
+    }
+
+    private void finalizeRecentlyStudiedList(List<StudyItem> recentlyStudiedList) {
+        if (recentlyStudiedList.isEmpty()) {
+            // If both quizzes and flashcards failed to load or don't exist
+            Toast.makeText(MainActivity.this, "No recently studied items found", Toast.LENGTH_SHORT).show();
+            Log.e("MainActivity", "No recently studied items found");
+        } else {
+            // Sort the combined list by lastAccessed, handling nulls
+            recentlyStudiedList.sort((a, b) -> {
+                Timestamp timeA = a.getLastAccessed();
+                Timestamp timeB = b.getLastAccessed();
+                if (timeA == null && timeB == null) return 0;
+                if (timeA == null) return 1;
+                if (timeB == null) return -1;
+                return timeB.compareTo(timeA); // Descending order
+            });
+
+            // Limit to 5 items
+            if (recentlyStudiedList.size() > 5) {
+                recentlyStudiedList = recentlyStudiedList.subList(0, 5);
+            }
+
+            recentlyStudiedAdapter.updateData(recentlyStudiedList);
+        }
+    }
+
 
     private void fetchQuizzes() {
         quizzesRef.get()
