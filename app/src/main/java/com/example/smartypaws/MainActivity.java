@@ -14,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +30,17 @@ public class MainActivity extends AppCompatActivity {
     private StudyItemAdapter myFlashcardsAdapter;
     private StudyItemAdapter myQuizzesAdapter;
 
+    private FirebaseFirestore db;
+    private CollectionReference quizzesRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initialize Firestore instance
+        db = FirebaseFirestore.getInstance();
+        quizzesRef = db.collection("quizzes");
 
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
@@ -46,14 +56,6 @@ public class MainActivity extends AppCompatActivity {
         List<StudyItem> myFlashcardsList = new ArrayList<>();
         List<StudyItem> myQuizzesList = new ArrayList<>();
 
-        // Add sample flashcards
-        recentlyStudiedList.add(new FlashcardSet("Recently Studied Flashcard", "Description 1"));
-        recentlyStudiedList.add(new Quiz("Recently Studied Quiz", "Description 2"));
-        myFlashcardsList.add(new FlashcardSet("My Flashcard 1", "Description 1"));
-        myFlashcardsList.add(new FlashcardSet("My Flashcard 2", "Description 2"));
-        myQuizzesList.add(new Quiz("My Quiz 1", "Description 1"));
-        myQuizzesList.add(new Quiz("My Quiz 2", "Description 2"));
-
         // Create adapters with click listeners
         recentlyStudiedAdapter = new StudyItemAdapter(recentlyStudiedList, this::navigateToView);
         myFlashcardsAdapter = new StudyItemAdapter(myFlashcardsList, this::navigateToView);
@@ -62,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
         recentlyStudiedRecyclerView.setAdapter(recentlyStudiedAdapter);
         myFlashcardsRecyclerView.setAdapter(myFlashcardsAdapter);
         myQuizzesRecyclerView.setAdapter(myQuizzesAdapter);
+
+        // Fetch quizzes from Firestore
+        fetchQuizzes();
 
         // Set up FAB click listener
         FloatingActionButton fab = findViewById(R.id.fabAdd);
@@ -117,7 +122,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    private void fetchQuizzes() {
+        quizzesRef.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<StudyItem> quizList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String title = document.getString("title");
+                            String description = document.getString("description");
+                            String id = document.getId();
+                            Quiz quiz = new Quiz(id, title, description);  // Assuming Quiz has this constructor
+                            quizList.add(quiz);
+                        }
+                        // Update the quiz adapter with the fetched quizzes
+                        myQuizzesAdapter.updateData(quizList);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
     private void navigateToView(StudyItem studyItem) {
         if (studyItem instanceof FlashcardSet) {

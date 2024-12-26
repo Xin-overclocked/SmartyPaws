@@ -23,6 +23,11 @@ public class StudyItemAdapter extends RecyclerView.Adapter<StudyItemAdapter.View
         this.listener = listener;
     }
 
+    public void updateData(List<StudyItem> newData) {
+        this.studyItems = newData;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
