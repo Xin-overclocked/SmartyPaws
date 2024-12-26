@@ -202,9 +202,10 @@ public class QuizViewActivity extends AppCompatActivity {
             if (itemId == R.id.menu_edit) {
                 editQuiz();
                 return true;
-            } else if (itemId == R.id.menu_share) {
-                shareQuiz();
-                return true;
+//            }
+//            else if (itemId == R.id.menu_share) {
+//                shareQuiz();
+//                return true;
             } else if (itemId == R.id.menu_delete) {
                 deleteQuiz();
                 return true;
