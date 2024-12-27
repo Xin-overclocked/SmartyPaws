@@ -2,6 +2,7 @@ package com.example.smartypaws;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -101,17 +102,11 @@ public class SettingActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /*private void showTextSizeDialog() {
-        String[] sizes = {"Small", "Medium", "Large"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Text Size")
-                .setItems(sizes, (dialog, which) -> {
-                    // TODO: Save selected text size preference
-                    String selectedSize = sizes[which];
-                    // Update app's text size
-                })
-                .show();
-    }*/
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(FontSizeContextWrapper.wrap(newBase));
+    }
+
     private void showTextSizeDialog() {
         String[] sizes = {"Small", "Medium", "Large"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -125,15 +120,10 @@ public class SettingActivity extends AppCompatActivity {
                     editor.putString("TextSize", selectedSize);
                     editor.apply();
 
-                    // Update the selected size TextView (TVSelectedSize)
-                    TextView tvSelectedSize = findViewById(R.id.TVSelectedSize);
-                    if (tvSelectedSize != null) {
-                        tvSelectedSize.setText("Selected Size: " + selectedSize);
-                    }
-
                     // Show a toast to confirm selection
                     Toast.makeText(this, "Text size set to " + selectedSize, Toast.LENGTH_SHORT).show();
 
+                    // Refresh the activity to apply changes
                     recreate();
                 })
                 .show();
@@ -180,7 +170,7 @@ public class SettingActivity extends AppCompatActivity {
         startActivity(intent);
         finish(); // Close the current activity to prevent returning to it
     }
-    
+
     private void deleteAccount() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -223,4 +213,3 @@ public class SettingActivity extends AppCompatActivity {
 
 
 }
-

@@ -18,10 +18,10 @@ public class FontSizeContextWrapper extends android.content.ContextWrapper {
         float fontScale;
         switch (textSize) {
             case "Small":
-                fontScale = 0.85f;
+                fontScale = 0.70f;
                 break;
             case "Large":
-                fontScale = 1.15f;
+                fontScale = 1.30f;
                 break;
             case "Medium":
             default:
