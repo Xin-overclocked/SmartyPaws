@@ -15,6 +15,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class SettingActivity extends AppCompatActivity {
 
     @Override
@@ -154,18 +158,7 @@ public class SettingActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void deleteAccount() {
-        // TODO: Implement account deletion logic
-        // After successful deletion:
-        // 1. Clear user data
-        // 2. Sign out
-        // 3. Return to login screen
-        Toast.makeText(this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, LoginActivity.class); // Replace with your login activity
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-    }
+
 
     // Method to handle log out logic
     private void logout() {
@@ -175,17 +168,59 @@ public class SettingActivity extends AppCompatActivity {
         editor.clear(); // Clears all saved preferences related to the session
         editor.apply();
 
-        // Optionally, you can log the user out of any services (e.g., Firebase, etc.)
-        // FirebaseAuth.getInstance().signOut();
+        // Log the user out of Firebase Authentication
+        FirebaseAuth.getInstance().signOut();
 
         // Show a Toast message confirming logout
         Toast.makeText(this, "Logged out successfully.", Toast.LENGTH_SHORT).show();
 
         // Redirect to the Login Activity after logout
-        Intent intent = new Intent(this, LoginActivity.class); // Make sure LoginActivity exists
+        Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Prevent going back to previous activity
         startActivity(intent);
-        finish(); // Close the current activity (SettingActivity) to prevent returning to it
+        finish(); // Close the current activity to prevent returning to it
     }
+    
+    private void deleteAccount() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        if (user != null) {
+            // Delete user data from Firestore
+            db.collection("users").document(user.getUid())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        // Delete the user from Firebase Authentication
+                        user.delete()
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        // Clear local session data
+                                        SharedPreferences sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.clear();
+                                        editor.apply();
+
+                                        // Notify user and redirect to Login screen
+                                        Toast.makeText(this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(this, LoginActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        // Handle deletion failure
+                                        Toast.makeText(this, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        // Handle Firestore deletion failure
+                        Toast.makeText(this, "Failed to delete user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        } else {
+            Toast.makeText(this, "No authenticated user found.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
 }
 
