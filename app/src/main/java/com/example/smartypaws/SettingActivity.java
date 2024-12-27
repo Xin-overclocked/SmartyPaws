@@ -68,8 +68,8 @@ public class SettingActivity extends AppCompatActivity {
 
         // Change Password
         // TODO: Implement change password functionality
-        /*CardView changePasswordCard = findViewById(R.id.changePasswordCard);
-        changePasswordCard.setOnClickListener(v -> openChangePassword());*/
+        CardView changePasswordCard = findViewById(R.id.changePasswordCard);
+        changePasswordCard.setOnClickListener(v -> openChangePassword());
 
         // Delete Account
         findViewById(R.id.deleteAccountButton).setOnClickListener(v -> showDeleteAccountDialog());
@@ -133,6 +133,8 @@ public class SettingActivity extends AppCompatActivity {
 
     private void openChangePassword() {
         // TODO: Implement change password activity
+        Intent intent = new Intent(this, ChangePasswordActivity.class);
+        startActivity(intent);
 
     }
 
