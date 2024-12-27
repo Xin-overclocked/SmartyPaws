@@ -176,7 +176,7 @@ public class SettingActivity extends AppCompatActivity {
         editor.apply();
 
         // Optionally, you can log the user out of any services (e.g., Firebase, etc.)
-        // Example: FirebaseAuth.getInstance().signOut();
+        // FirebaseAuth.getInstance().signOut();
 
         // Show a Toast message confirming logout
         Toast.makeText(this, "Logged out successfully.", Toast.LENGTH_SHORT).show();
@@ -187,6 +187,5 @@ public class SettingActivity extends AppCompatActivity {
         startActivity(intent);
         finish(); // Close the current activity (SettingActivity) to prevent returning to it
     }
-
 }
 
