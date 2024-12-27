@@ -1,34 +1,34 @@
 package com.example.smartypaws;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class FeedbackActivity extends AppCompatActivity {
     private EditText feedbackEditText;
-    private DatabaseReference databaseReference;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
 
-        // Initialize Firebase
-        databaseReference = FirebaseDatabase.getInstance().getReference("Feedback");
+        // Initialize Firebase Firestore and Auth
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         // Initialize views
         feedbackEditText = findViewById(R.id.feedbackEditText);
@@ -48,26 +48,24 @@ public class FeedbackActivity extends AppCompatActivity {
             return;
         }
 
-        // Get user email and current timestamp
-        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        // Get the current user's email and the current timestamp
+        String userEmail = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getEmail() : "Anonymous";
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
         // Create a feedback object
-        HashMap<String, String> feedbackData = new HashMap<>();
+        HashMap<String, Object> feedbackData = new HashMap<>();
         feedbackData.put("email", userEmail);
         feedbackData.put("feedback", feedback);
         feedbackData.put("timestamp", timestamp);
 
-        // Push feedback to Firebase
-        databaseReference.push().setValue(feedbackData)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(this, "Thank you for your feedback!", Toast.LENGTH_SHORT).show();
-                        feedbackEditText.setText(""); // Clear input
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Failed to send feedback. Please try again.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // Save feedback to Firestore
+        db.collection("feedbacks")
+                .add(feedbackData)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this, "Thank you for your feedback!", Toast.LENGTH_SHORT).show();
+                    feedbackEditText.setText(""); // Clear the input field
+                    finish();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to send feedback. Please try again.", Toast.LENGTH_SHORT).show());
     }
 }
