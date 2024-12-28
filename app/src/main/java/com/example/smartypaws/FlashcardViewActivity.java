@@ -1,5 +1,6 @@
 package com.example.smartypaws;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,8 +18,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.w3c.dom.Text;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class FlashcardViewActivity extends AppCompatActivity {
     private LinearLayout flashcardsContainer;
@@ -26,9 +33,11 @@ public class FlashcardViewActivity extends AppCompatActivity {
     private String flashcardSetTitle;
     private String flashcardSetDescription;
     private ArrayList<String> cardsIds;
+    private String createDat;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,15 +53,34 @@ public class FlashcardViewActivity extends AppCompatActivity {
         flashcardSetTitle = getIntent().getStringExtra("FLASHCARD_SET_TITLE");
         flashcardSetDescription = getIntent().getStringExtra("FLASHCARD_SET_DESCRIPTION");
         cardsIds = getIntent().getStringArrayListExtra("FLASHCARD_SET_CARDS");
+        createDat = getIntent().getStringExtra("FLASHCARD_SET_CREATE");
 
         // Use the data to set up your view
         TextView titleTextView = findViewById(R.id.flashcardTitle);
+        TextView dateText = findViewById(R.id.dateText);
         titleTextView.setText(flashcardSetTitle);
         TextView descriptionTextView = findViewById(R.id.flashcardDescription);
         descriptionTextView.setText(flashcardSetDescription);
+        TextView noOfCards = findViewById(R.id.numberOfFlashcard);
 
         // Fetch and display flashcard data using the ID
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+        String createdAt = createDat; // Assuming this is a String
 
+        // Correct format to match "yyyy-MM-dd" (e.g., "2024-12-28")
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            // Parse the input date string
+            Date date = inputDateFormat.parse(createdAt);
+            // Format the date into the desired output format "dd MMMM yyyy"
+            dateText.setText(dateFormat.format(date));
+        } catch (ParseException e) {
+            dateText.setText("Invalid Date");
+        }
+
+
+        // Set flashcard count
+        noOfCards.setText(cardsIds.size() + " flashcards");
 
         // Setup back button
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
@@ -63,8 +91,7 @@ public class FlashcardViewActivity extends AppCompatActivity {
         // Setup study button
         findViewById(R.id.studyButton).setOnClickListener(v -> startStudyMode());
 
-        // Add flashcard pairs
-//        addFlashcardPairs();
+        // Add flashcard
         addFlashcard();
 
     }
@@ -115,30 +142,6 @@ public class FlashcardViewActivity extends AppCompatActivity {
             }).addOnFailureListener(e -> {
                 Log.e("Firestore", "Error fetching flashcard data: ", e);
             });
-        }
-    }
-
-
-
-    private void addFlashcardPairs() {
-
-        // Sample data - in a real app, this would come from a database or API
-        String[][] flashcardData = {
-                {"Term 1", "This is term 1's definition"},
-                {"Term 2", "This is term 2's definition"},
-                {"Term 3", "This is term 3's definition"}
-        };
-
-        for (String[] pair : flashcardData) {
-            View cardPair = getLayoutInflater().inflate(R.layout.item_flashcard_pair, flashcardsContainer, false);
-
-            TextView termText = cardPair.findViewById(R.id.termText);
-            TextView definitionText = cardPair.findViewById(R.id.definitionText);
-
-            termText.setText(pair[0]);
-            definitionText.setText(pair[1]);
-
-            flashcardsContainer.addView(cardPair);
         }
     }
 

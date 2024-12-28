@@ -2,6 +2,7 @@ package com.example.smartypaws;
 
 import com.google.firebase.Timestamp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FlashcardSet implements StudyItem{
@@ -16,12 +17,11 @@ public class FlashcardSet implements StudyItem{
     // Default constructor required for calls to DataSnapshot.getValue(FlashcardSet.class)
     public FlashcardSet() {}
 
-    public FlashcardSet(String title, String description, String date, Timestamp lastAccessed, List<String> flashcardList) {
+    public FlashcardSet(String title, String description, List<String> flashcardList, String date) {
         this.title = title;
         this.description = description;
-        this.date = date;
-        this.lastAccessed = lastAccessed;
         this.flashcardList = flashcardList;
+        this.date = date;
     }
 
     public FlashcardSet(String title,String description) {
@@ -35,11 +35,12 @@ public class FlashcardSet implements StudyItem{
         this.description = description;
     }
 
-    public FlashcardSet(String id, String title, String description, List<String> flashcardList) {
+    public FlashcardSet(String id, String title, String description, ArrayList<String> cardIds, String date) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.flashcardList = flashcardList;
+        this.flashcardList = cardIds;
+        this.date = date;
     }
 
     // Getters and setters
