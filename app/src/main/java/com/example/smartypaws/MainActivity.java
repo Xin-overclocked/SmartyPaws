@@ -225,7 +225,8 @@ public class MainActivity extends AppCompatActivity {
                             String id = document.getId();
                             ArrayList<String> cardIds = (ArrayList<String>) document.get("flashcardList");
                             String date = document.getString("date");
-                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description,cardIds, date);  // Assuming Quiz has this constructor
+                            String userid = document.getString("userid");
+                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description,cardIds, date, userid);  // Assuming Quiz has this constructor
                             flashcardSetsList.add(flashcardSet);
                         }
                         // Update the quiz adapter with the fetched quizzes
@@ -266,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<String> flashcardList = (ArrayList<String>) flashcardSet.getFlashcardList();
             intent.putExtra("FLASHCARD_SET_CARDS", flashcardList);
             intent.putExtra("FLASHCARD_SET_CREATE", flashcardSet.getDate());
+            intent.putExtra("FLASHCARD_SET_USERID", flashcardSet.getUserid());
             startActivity(intent);
         }
         if (studyItem instanceof Quiz) {

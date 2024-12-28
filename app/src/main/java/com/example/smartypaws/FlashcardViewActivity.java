@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,6 +35,7 @@ public class FlashcardViewActivity extends AppCompatActivity {
     private String flashcardSetDescription;
     private ArrayList<String> cardsIds;
     private String createDat;
+    private String flashcardSetUserId;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
@@ -56,6 +58,7 @@ public class FlashcardViewActivity extends AppCompatActivity {
         flashcardSetDescription = getIntent().getStringExtra("FLASHCARD_SET_DESCRIPTION");
         cardsIds = getIntent().getStringArrayListExtra("FLASHCARD_SET_CARDS");
         createDat = getIntent().getStringExtra("FLASHCARD_SET_CREATE");
+        flashcardSetUserId = getIntent().getStringExtra("FLASHCARD_SET_USERID");
 
         // Use the data to set up your view
         TextView titleTextView = findViewById(R.id.flashcardTitle);
@@ -97,6 +100,32 @@ public class FlashcardViewActivity extends AppCompatActivity {
         addFlashcard();
 
     }
+
+//    private void addQuestionView(int questionNumber, Quiz.Question question) {
+//        View questionView = getLayoutInflater().inflate(R.layout.item_question, flashcardsContainer, false);
+//
+//        // Set question text
+//        TextView questionTextView = questionView.findViewById(R.id.questionTextView);
+//        questionTextView.setText(question.getText());
+//
+//        // Get the options container
+//        LinearLayout optionsContainer = questionView.findViewById(R.id.optionsContainer);
+//        optionsContainer.removeAllViews(); // Clear any existing views
+//
+//        // Add options dynamically
+//        for (Quiz.Question.Option option : question.getOptions()) {
+//            // Inflate the item_option layout (LinearLayout)
+//            View optionView = getLayoutInflater().inflate(R.layout.item_option, optionsContainer, false);
+//
+//            // Get the button inside the inflated layout
+//            Button optionButton = optionView.findViewById(R.id.optionButton);
+//            optionButton.setText(option.getText());
+//            optionButton.setOnClickListener(v -> handleOptionClick(optionButton, option.isCorrect()));
+//            optionsContainer.addView(optionView);
+//        }
+//
+//        questionsContainer.addView(questionView);
+//    }
 
     private void addFlashcard() {
         // Initialize the HashMap for storing flashcard data
@@ -145,6 +174,13 @@ public class FlashcardViewActivity extends AppCompatActivity {
             });
         }
     }
+    private void updateLastAccessed() {
+        db.collection("flashcardSet").document(flashcardSetId)
+                .update("lastAccessed", Timestamp.now())
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to update last accessed time", Toast.LENGTH_SHORT).show();
+                });
+    }
 
     private void showMenu() {
         PopupMenu popup = new PopupMenu(this, findViewById(R.id.menuButton));
@@ -152,10 +188,6 @@ public class FlashcardViewActivity extends AppCompatActivity {
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_edit) {
                 editFlashcardSet();
-                return true;
-            }
-            if (item.getItemId() == R.id.action_share) {
-                shareFlashcardSet();
                 return true;
             }
             if (item.getItemId() == R.id.action_delete) {
@@ -170,29 +202,40 @@ public class FlashcardViewActivity extends AppCompatActivity {
     private void editFlashcardSet() {
         // Implement edit functionality
         Toast.makeText(this, "Edit flashcard set", Toast.LENGTH_SHORT).show();
-
         Intent editIntent = new Intent(this, FlashcardEditActivity.class);
-//        editIntent.putExtra("FLASHCARD_SET_ID", flashcardSetId);
         startActivity(editIntent);
     }
 
-    private void shareFlashcardSet() {
-        // Implement share functionality
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this flashcard set!");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "I'm studying " + flashcardSetTitle + ". Join me!");
-        startActivity(Intent.createChooser(shareIntent, "Share via"));
-    }
-
     private void deleteFlashcardSet() {
-        // Implement delete functionality
         new AlertDialog.Builder(this)
-                .setTitle("Delete Flashcard Set")
-                .setMessage("Are you sure you want to delete this flashcard set?")
+                .setTitle("Delete Quiz")
+                .setMessage("Are you sure you want to delete this quiz?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    // Perform deletion from Firebase
-
+                    String currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "";
+                    if (flashcardSetUserId.equals(currentUserId)) {
+                        db.collection("flashcardSet").document(flashcardSetId)
+                                .delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(this, "FlashcardSet deleted successfully", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Error deleting flashcardSet: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                        for(String cardid : cardsIds) {
+                            db.collection("flashcards").document(cardid)
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(this, "Card deleted successfully", Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(this, "Error deleting card: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    } else {
+                        Toast.makeText(this, "You don't have permission to delete this flashcardSet", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
