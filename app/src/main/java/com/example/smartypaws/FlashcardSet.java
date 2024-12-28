@@ -10,13 +10,13 @@ public class FlashcardSet implements StudyItem{
     private String date;
     private Timestamp lastAccessed;
     private String description;
-    private List<Flashcard> flashcardList;
+    private List<String> flashcardList;
     private String userid;
 
     // Default constructor required for calls to DataSnapshot.getValue(FlashcardSet.class)
     public FlashcardSet() {}
 
-    public FlashcardSet(String title, String description, String date, Timestamp lastAccessed, List<Flashcard> flashcardList) {
+    public FlashcardSet(String title, String description, String date, Timestamp lastAccessed, List<String> flashcardList) {
         this.title = title;
         this.description = description;
         this.date = date;
@@ -33,6 +33,13 @@ public class FlashcardSet implements StudyItem{
         this.id = id;
         this.title = title;
         this.description = description;
+    }
+
+    public FlashcardSet(String id, String title, String description, List<String> flashcardList) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.flashcardList = flashcardList;
     }
 
     // Getters and setters
@@ -54,8 +61,8 @@ public class FlashcardSet implements StudyItem{
     }
 
     public void setDescription(String description) { this.description = description; }
-    public List<Flashcard> getFlashcardList() { return flashcardList; }
-    public void setFlashcards(List<Flashcard> flashcardList) { this.flashcardList = flashcardList; }
+    public List<String> getFlashcardList() { return flashcardList; }
+    public void setFlashcards(List<String> flashcardList) { this.flashcardList = flashcardList; }
     public String getUserid() {
         return userid;
     }
