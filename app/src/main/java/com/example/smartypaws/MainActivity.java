@@ -37,7 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private CollectionReference quizzesRef;
+    private CollectionReference flashcardSetsRef;
     private FirebaseAuth auth;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         quizzesRef = db.collection("quizzes");
+        flashcardSetsRef = db.collection("flashcardSet");
 
         // Setup SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -81,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         myFlashcardsRecyclerView.setAdapter(myFlashcardsAdapter);
         myQuizzesRecyclerView.setAdapter(myQuizzesAdapter);
 
+        // Get the current user ID
+        currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
         // Fetch quizzes from Firestore
         fetchFlashcards();
@@ -141,12 +146,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchFlashcards() {
-        // TODO implement fetch flashcard logic from db
-    }
-
     private void fetchRecentlyStudied() {
-        String userId = auth.getCurrentUser().getUid();
+        String userId = currentUserId;
         List<StudyItem> recentlyStudiedList = new ArrayList<>();
 
         // Query for recently studied quizzes
@@ -169,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchFlashcardsForRecentlyStudied(List<StudyItem> recentlyStudiedList) {
-        String userId = auth.getCurrentUser().getUid();
+        String userId = currentUserId;
         db.collection("flashcards")
                 .whereEqualTo("userId", userId)
                 .orderBy("lastAccessed", Query.Direction.DESCENDING)
@@ -213,6 +214,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void fetchFlashcards() {
+        flashcardSetsRef.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<StudyItem> flashcardSetsList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String title = document.getString("title");
+                            String description = document.getString("description");
+                            String id = document.getId();
+                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description);  // Assuming Quiz has this constructor
+                            flashcardSetsList.add(flashcardSet);
+                        }
+                        // Update the quiz adapter with the fetched quizzes
+                        myFlashcardsAdapter.updateData(flashcardSetsList);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
     private void fetchQuizzes() {
         quizzesRef.get()

@@ -11,6 +11,7 @@ public class FlashcardSet implements StudyItem{
     private Timestamp lastAccessed;
     private String description;
     private List<Flashcard> flashcardList;
+    private String userid;
 
     // Default constructor required for calls to DataSnapshot.getValue(FlashcardSet.class)
     public FlashcardSet() {}
@@ -28,6 +29,12 @@ public class FlashcardSet implements StudyItem{
         this.description = description;
     }
 
+    public FlashcardSet(String id, String title, String description) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+    }
+
     // Getters and setters
     public String getId() { return id; }
     public String getTitle() { return title; }
@@ -38,7 +45,7 @@ public class FlashcardSet implements StudyItem{
 
     @Override
     public void setLastAccessed(Timestamp timestamp) {
-
+        lastAccessed = timestamp;
     }
 
     @Override
@@ -49,4 +56,14 @@ public class FlashcardSet implements StudyItem{
     public void setDescription(String description) { this.description = description; }
     public List<Flashcard> getFlashcardList() { return flashcardList; }
     public void setFlashcards(List<Flashcard> flashcardList) { this.flashcardList = flashcardList; }
+    public String getUserid() {
+        return userid;
+    }
+    public void setUserid(String userid) {
+        this.userid = userid;
+    }
+
+    public void setId(String flashcardSetId) {
+        id = flashcardSetId;
+    }
 }
