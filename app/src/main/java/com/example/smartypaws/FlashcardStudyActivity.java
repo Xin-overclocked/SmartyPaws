@@ -14,17 +14,24 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class FlashcardStudyActivity extends AppCompatActivity {
     private TextView termText;
     private TextView definitionText;
     private View flipContainer;
     private TextView progressText;
     private ProgressBar progressBar;
-    private int currentPosition = 0; // 5th card (0-based index)
-    private int totalCards = 15;
+    private int currentPosition; // 5th card (0-based index)
+    private int totalCards;
     private boolean isShowingTerm = true;
     private String flashcardSetId;
     private String flashcardSetTitle;
+    private HashMap<String, String> flashcardMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +41,7 @@ public class FlashcardStudyActivity extends AppCompatActivity {
         // Get flashcard id and title from the intent
         flashcardSetId = getIntent().getStringExtra("FLASHCARD_SET_ID");
         flashcardSetTitle = getIntent().getStringExtra("FLASHCARD_SET_TITLE");
+        flashcardMap = (HashMap<String, String>) getIntent().getSerializableExtra("FLASHCARD_DATA");
 
         TextView titleTextView = findViewById(R.id.flashcardTitle);
         titleTextView.setText(flashcardSetTitle);
@@ -53,10 +61,37 @@ public class FlashcardStudyActivity extends AppCompatActivity {
 
         // Initialize progress
         updateProgress();
+
+        // Initialize progress and total cards
+        totalCards = flashcardMap.size();
+        currentPosition = 0;
+        updateProgress();
+        showCard(currentPosition);
+    }
+
+    private void showCard(int position) {
+        // Get the current term and definition based on the current position
+        List<Map.Entry<String, String>> flashcardList = new ArrayList<>(flashcardMap.entrySet());
+        Map.Entry<String, String> currentCard = flashcardList.get(position);
+
+        // Update term and definition text
+        String term = currentCard.getKey();
+        String definition = currentCard.getValue();
+
+        termText.setText(term);
+        definitionText.setText(definition);
+
+        // Ensure the term is visible, and the definition is hidden initially
+        if (!isShowingTerm) {
+            termText.setVisibility(View.VISIBLE);
+            definitionText.setVisibility(View.GONE);
+            flipContainer.setRotationY(0f);
+            isShowingTerm = true;
+        }
     }
 
     private void flipCard() {
-        // Create animations
+        // Create flip animations
         float scale = getResources().getDisplayMetrics().density * 8000;
         Camera camera = new Camera();
 
@@ -73,7 +108,7 @@ public class FlashcardStudyActivity extends AppCompatActivity {
         firstHalf.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                // Switch visibility at the middle of animation
+                // Switch visibility at the middle of the animation
                 if (isShowingTerm) {
                     termText.setVisibility(View.GONE);
                     definitionText.setVisibility(View.VISIBLE);
@@ -94,15 +129,7 @@ public class FlashcardStudyActivity extends AppCompatActivity {
         if (currentPosition > 0) {
             currentPosition--;
             updateProgress();
-            // Reset to term side when changing cards
-            if (!isShowingTerm) {
-                isShowingTerm = true;
-                termText.setVisibility(View.VISIBLE);
-                definitionText.setVisibility(View.GONE);
-                flipContainer.setRotationY(0f);
-            }
-            // Here you would update the term and definition text
-            // based on your data source
+            showCard(currentPosition);
         }
     }
 
@@ -110,15 +137,7 @@ public class FlashcardStudyActivity extends AppCompatActivity {
         if (currentPosition < totalCards - 1) {
             currentPosition++;
             updateProgress();
-            // Reset to term side when changing cards
-            if (!isShowingTerm) {
-                isShowingTerm = true;
-                termText.setVisibility(View.VISIBLE);
-                definitionText.setVisibility(View.GONE);
-                flipContainer.setRotationY(0f);
-            }
-            // Here you would update the term and definition text
-            // based on your data source
+            showCard(currentPosition);
         }
     }
 

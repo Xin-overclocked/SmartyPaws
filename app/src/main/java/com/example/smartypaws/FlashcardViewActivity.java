@@ -37,6 +37,8 @@ public class FlashcardViewActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
+    private HashMap<String, String> flashcardMap = new HashMap<>();
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +100,7 @@ public class FlashcardViewActivity extends AppCompatActivity {
 
     private void addFlashcard() {
         // Initialize the HashMap for storing flashcard data
-        HashMap<String, String> flashcardMap = new HashMap<>();
+//        HashMap<String, String> flashcardMap = new HashMap<>();
 
         // Assuming `cardIds` is already available (the list of card IDs you retrieved earlier)
         ArrayList<String> cardIds = cardsIds; // Replace this with your actual method to get card IDs
@@ -116,7 +118,6 @@ public class FlashcardViewActivity extends AppCompatActivity {
         for (String cardId : cardIds) {
             // Reference to the flashcard document using the card ID
             DocumentReference flashcardRef = db.collection("flashcards").document(cardId);
-            System.out.println(cardId);
 
             // Fetch the flashcard document
             flashcardRef.get().addOnSuccessListener(flashcardSnapshot -> {
@@ -202,6 +203,12 @@ public class FlashcardViewActivity extends AppCompatActivity {
         Intent studyIntent = new Intent(this, FlashcardStudyActivity.class);
         studyIntent.putExtra("FLASHCARD_SET_ID", flashcardSetId);
         studyIntent.putExtra("FLASHCARD_SET_TITLE", flashcardSetTitle);
+        // Store the HashMap in a Bundle
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("FLASHCARD_DATA", flashcardMap);  // Store the HashMap
+
+        // Attach the Bundle to the Intent
+        studyIntent.putExtras(bundle);
         startActivity(studyIntent);
     }
 }
