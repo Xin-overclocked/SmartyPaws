@@ -34,18 +34,22 @@
     </LinearLayout>
 
     <!-- Title -->
+
+    <!-- Feedback Card -->
+
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/TVNotification"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
-        android:text="Feedback"
+        android:text="Notification"
         android:textColor="@color/white"
         android:textSize="32sp"
         android:textStyle="bold" />
 
-    <!-- Feedback Card -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -58,27 +62,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#FFFFFF"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/testNotificationButton"
+                android:layout_width="344dp"
                 android:layout_height="wrap_content"
-                android:text="What's on your thought?"
-                android:textColor="@color/black"
-                android:textSize="16sp"/>
+                android:text="Test Notification" />
 
-            <EditText
-                android:id="@+id/feedbackEditText"
+            <!-- Time Picker -->
+            <TimePicker
+                android:id="@+id/timePicker"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="#666666"
-                android:gravity="top"
-                android:hint="Type here..."
-                android:padding="12dp"
-                android:inputType="textMultiLine"/>
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:timePickerMode="spinner"/>
 
         </LinearLayout>
 
@@ -89,11 +89,11 @@
         android:id="@+id/setButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Submit"
-        android:textColor="@color/black"
-        android:backgroundTint="@color/light_purple"
         android:layout_margin="16dp"
-        android:padding="16dp"/>
+        android:backgroundTint="@color/light_purple"
+        android:padding="16dp"
+        android:text="Set"
+        android:textColor="@color/black" />
 
 </LinearLayout>
 

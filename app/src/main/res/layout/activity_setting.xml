@@ -20,13 +20,14 @@
             android:contentDescription="Back"/>
 
         <TextView
+            android:id="@+id/TVSetting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="Settings"
-            android:textSize="20sp"
             android:textColor="@color/black"
-            android:textStyle="bold"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <!-- Settings Options -->
@@ -43,7 +44,26 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Leave a Review -->
+            <!-- Notification Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/notificationCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Notification"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Leave a Review Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/leaveReviewCard"
                 android:layout_width="match_parent"
@@ -62,7 +82,7 @@
                     android:textSize="16sp"/>
             </androidx.cardview.widget.CardView>
 
-            <!-- Submit Feedback -->
+            <!-- Submit Feedback Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/submitFeedbackCard"
                 android:layout_width="match_parent"
@@ -81,7 +101,7 @@
                     android:textSize="16sp"/>
             </androidx.cardview.widget.CardView>
 
-            <!-- Text Size -->
+            <!-- Text Size Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/textSizeCard"
                 android:layout_width="match_parent"
@@ -104,16 +124,17 @@
                         android:textSize="16sp"/>
 
                     <TextView
+                        android:id="@+id/TVSelectedSize"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:text="Medium"
                         android:textColor="@color/black"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Change Password -->
+            <!-- Change Password Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/changePasswordCard"
                 android:layout_width="match_parent"
@@ -132,16 +153,27 @@
                     android:textSize="16sp"/>
             </androidx.cardview.widget.CardView>
 
-            <!-- Delete Account -->
+            <!-- Log Out Button -->
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Log out"
+                android:textColor="@color/white"
+                android:backgroundTint="#7948AE"
+                android:padding="16dp"/>
+
+            <!-- Delete Account Button -->
             <Button
                 android:id="@+id/deleteAccountButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Delete Account"
-                android:textColor="@color/white"
                 android:backgroundTint="#DE2828"
-                android:padding="16dp"/>
+                android:padding="16dp"
+                android:text="Delete Account"
+                android:textColor="@color/white" />
 
         </LinearLayout>
     </ScrollView>

@@ -35,7 +35,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -47,6 +46,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Additional dependencies
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -55,9 +56,11 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
+    // Firebase dependencies
     implementation("com.google.firebase:firebase-firestore:25.1.1")
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    implementation ("com.google.firebase:firebase-auth:21.1.0")
-    implementation ("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.google.firebase:firebase-auth:21.1.0")
+    implementation("com.google.firebase:firebase-database:20.2.2") // Added this
+    implementation("com.google.android.gms:play-services-auth:20.3.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 }
