@@ -216,8 +216,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void fetchFlashcards() {
-        flashcardSetsRef.get()
+        flashcardSetsRef
+                .whereEqualTo("userid", currentUserId)
+                .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<StudyItem> flashcardSetsList = new ArrayList<>();
@@ -228,19 +231,20 @@ public class MainActivity extends AppCompatActivity {
                             ArrayList<String> cardIds = (ArrayList<String>) document.get("flashcardList");
                             String date = document.getString("date");
                             String userid = document.getString("userid");
-                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description,cardIds, date, userid);  // Assuming Quiz has this constructor
+                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description, cardIds, date, userid);
                             flashcardSetsList.add(flashcardSet);
                         }
-                        // Update the quiz adapter with the fetched quizzes
                         myFlashcardsAdapter.updateData(flashcardSetsList);
                     } else {
-                        Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Failed to load flashcards", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void fetchQuizzes() {
-        quizzesRef.get()
+        quizzesRef
+                .whereEqualTo("userId", currentUserId)
+                .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<StudyItem> quizList = new ArrayList<>();
@@ -248,10 +252,9 @@ public class MainActivity extends AppCompatActivity {
                             String title = document.getString("title");
                             String description = document.getString("description");
                             String id = document.getId();
-                            Quiz quiz = new Quiz(id, title, description);  // Assuming Quiz has this constructor
+                            Quiz quiz = new Quiz(id, title, description);
                             quizList.add(quiz);
                         }
-                        // Update the quiz adapter with the fetched quizzes
                         myQuizzesAdapter.updateData(quizList);
                     } else {
                         Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
