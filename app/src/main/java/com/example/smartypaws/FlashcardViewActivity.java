@@ -41,6 +41,11 @@ public class FlashcardViewActivity extends AppCompatActivity {
     // Add a map to store flashcard IDs with their content
     private HashMap<String, Map<String, String>> flashcardFullData = new HashMap<>();
 
+    private TextView titleTextView;
+    private TextView dateText;
+    private TextView descriptionTextView;
+    private TextView noOfCards;
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,39 +57,68 @@ public class FlashcardViewActivity extends AppCompatActivity {
 
         flashcardsContainer = findViewById(R.id.flashcardsContainer);
 
-        // Get data from intent
+        // Get flashcard set ID from intent
         flashcardSetId = getIntent().getStringExtra("FLASHCARD_SET_ID");
-        flashcardSetTitle = getIntent().getStringExtra("FLASHCARD_SET_TITLE");
-        flashcardSetDescription = getIntent().getStringExtra("FLASHCARD_SET_DESCRIPTION");
-        cardsIds = getIntent().getStringArrayListExtra("FLASHCARD_SET_CARDS");
-        createDat = getIntent().getStringExtra("FLASHCARD_SET_CREATE");
-        flashcardSetUserId = getIntent().getStringExtra("FLASHCARD_SET_USERID");
 
-        // Set up views
-        TextView titleTextView = findViewById(R.id.flashcardTitle);
-        TextView dateText = findViewById(R.id.dateText);
-        TextView descriptionTextView = findViewById(R.id.flashcardDescription);
-        TextView noOfCards = findViewById(R.id.numberOfFlashcard);
-
-        titleTextView.setText(flashcardSetTitle);
-        descriptionTextView.setText(flashcardSetDescription);
-
-        // Format and set date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
-        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        try {
-            Date date = inputDateFormat.parse(createDat);
-            dateText.setText(dateFormat.format(date));
-        } catch (ParseException e) {
-            dateText.setText("Invalid Date");
-        }
-
-        noOfCards.setText(cardsIds.size() + " flashcards");
+        // Initialize views
+        titleTextView = findViewById(R.id.flashcardTitle);
+        dateText = findViewById(R.id.dateText);
+        descriptionTextView = findViewById(R.id.flashcardDescription);
+        noOfCards = findViewById(R.id.numberOfFlashcard);
 
         // Set up buttons
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
         findViewById(R.id.menuButton).setOnClickListener(v -> showMenu());
         findViewById(R.id.studyButton).setOnClickListener(v -> startStudyMode());
+
+        // Setup realtime updates
+        setupRealtimeUpdates();
+    }
+
+    private void setupRealtimeUpdates() {
+        db.collection("flashcardSet").document(flashcardSetId)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        Log.w("FlashcardView", "Listen failed.", e);
+                        return;
+                    }
+
+                    if (snapshot != null && snapshot.exists()) {
+                        // Update flashcard set data
+                        flashcardSetTitle = snapshot.getString("title");
+                        flashcardSetDescription = snapshot.getString("description");
+                        createDat = snapshot.getString("date");
+                        cardsIds = (ArrayList<String>) snapshot.get("flashcardList");
+                        flashcardSetUserId = snapshot.getString("userid");
+
+                        // Update UI elements
+                        titleTextView.setText(flashcardSetTitle);
+                        descriptionTextView.setText(flashcardSetDescription);
+
+                        // Format and set date
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+                        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        try {
+                            Date date = inputDateFormat.parse(createDat);
+                            dateText.setText(dateFormat.format(date));
+                        } catch (ParseException ex) {
+                            dateText.setText("Invalid Date");
+                        }
+
+                        if (cardsIds != null) {
+                            noOfCards.setText(cardsIds.size() + " flashcards");
+                            // Refresh flashcards
+                            refreshFlashcards();
+                        }
+                    }
+                });
+    }
+
+    private void refreshFlashcards() {
+        // Clear existing data
+        flashcardsContainer.removeAllViews();
+        flashcardMap.clear();
+        flashcardFullData.clear();
 
         // Load flashcards
         addFlashcard();
@@ -103,14 +137,6 @@ public class FlashcardViewActivity extends AppCompatActivity {
                     String term = flashcardSnapshot.getString("term");
                     String definition = flashcardSnapshot.getString("definition");
 
-                    // Store both the simple map and full data
-                    flashcardMap.put(term, definition);
-
-                    Map<String, String> cardData = new HashMap<>();
-                    cardData.put("term", term);
-                    cardData.put("definition", definition);
-                    flashcardFullData.put(cardId, cardData);
-
                     // Create and add view
                     View cardPair = getLayoutInflater().inflate(R.layout.item_flashcard_pair, flashcardsContainer, false);
                     TextView termText = cardPair.findViewById(R.id.termText);
@@ -123,6 +149,14 @@ public class FlashcardViewActivity extends AppCompatActivity {
                     cardPair.setTag(cardId);
 
                     flashcardsContainer.addView(cardPair);
+
+                    // Store both the simple map and full data
+                    flashcardMap.put(term, definition);
+
+                    Map<String, String> cardData = new HashMap<>();
+                    cardData.put("term", term);
+                    cardData.put("definition", definition);
+                    flashcardFullData.put(cardId, cardData);
                 }
             }).addOnFailureListener(e -> {
                 Log.e("Firestore", "Error fetching flashcard data: ", e);

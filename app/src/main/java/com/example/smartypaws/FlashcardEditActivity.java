@@ -158,25 +158,8 @@ public class FlashcardEditActivity extends AppCompatActivity {
                 flashcardsContainer.removeView(cardView);
             }
         });
-
-        setupMenuButtons(cardView);
     }
 
-    private void setupMenuButtons(View cardView) {
-        cardView.findViewById(R.id.termMenuButton).setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v);
-            popup.inflate(R.menu.flashcard_edit_menu);
-            popup.show();
-        });
-
-        cardView.findViewById(R.id.definitionMenuButton).setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(this, v);
-            popup.inflate(R.menu.flashcard_edit_menu);
-            popup.show();
-        });
-    }
-
-    @SuppressLint("SimpleDateFormat")
     private void saveFlashcardSet() {
         String title = titleEditText.getText().toString().trim();
         String description = descriptionEditText.getText().toString().trim();
@@ -186,6 +169,10 @@ public class FlashcardEditActivity extends AppCompatActivity {
             return;
         }
 
+        // Show loading indicator
+        View loadingView = findViewById(R.id.loadingView); // Add this to your layout
+        if (loadingView != null) loadingView.setVisibility(View.VISIBLE);
+
         FlashcardSet flashcardSet = new FlashcardSet();
         flashcardSet.setTitle(title);
         flashcardSet.setDescription(description);
@@ -193,68 +180,139 @@ public class FlashcardEditActivity extends AppCompatActivity {
         flashcardSet.setDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
         flashcardSet.setLastAccessed(new Timestamp(new Date()));
 
-        // Handle create or update
         DocumentReference setRef = (flashcardSetId == null) ?
-                db.collection("flashcardSet").document() : db.collection("flashcardSet").document(flashcardSetId);
+                db.collection("flashcardSet").document() :
+                db.collection("flashcardSet").document(flashcardSetId);
 
         flashcardSetId = setRef.getId();
         flashcardSet.setId(flashcardSetId);
 
-        setRef.set(flashcardSet)
-                .addOnSuccessListener(aVoid -> saveFlashcard(flashcardSetId, title))
-                .addOnFailureListener(e -> Toast.makeText(this, "Error saving flashcard set: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
+        // Use a transaction to ensure atomic updates
+        db.runTransaction(transaction -> {
+            // Save flashcard set
+            transaction.set(setRef, flashcardSet);
 
-    private void saveFlashcard(String flashcardSetId, String title) {
-        List<Task<Void>> saveTasks = new ArrayList<>();
+            // Save all flashcards
+            ArrayList<String> flashcardIds = new ArrayList<>();
+            for (int i = 0; i < flashcardsContainer.getChildCount(); i++) {
+                View flashcardView = flashcardsContainer.getChildAt(i);
+                EditText termEditText = flashcardView.findViewById(R.id.termEdit);
+                EditText definitionEditText = flashcardView.findViewById(R.id.definitionEdit);
 
-        for (int i = 0; i < flashcardsContainer.getChildCount(); i++) {
-            View flashcardView = flashcardsContainer.getChildAt(i);
-            EditText termEditText = flashcardView.findViewById(R.id.termEdit);
-            EditText definitionEditText = flashcardView.findViewById(R.id.definitionEdit);
+                String term = termEditText.getText().toString().trim();
+                String definition = definitionEditText.getText().toString().trim();
+                String flashcardId = (String) flashcardView.getTag();
 
-            String term = termEditText.getText().toString().trim();
-            String definition = definitionEditText.getText().toString().trim();
-            String flashcardId = (String) flashcardView.getTag();
+                if (!term.isEmpty() && !definition.isEmpty()) {
+                    if (flashcardId == null) {
+                        flashcardId = db.collection("flashcards").document().getId();
+                        flashcardView.setTag(flashcardId);
+                    }
 
-            if (!term.isEmpty() && !definition.isEmpty()) {
-                if (flashcardId == null) {
-                    // This is a new flashcard
-                    flashcardId = db.collection("flashcards").document().getId();
-                    flashcardView.setTag(flashcardId);
+                    Flashcard flashcard = new Flashcard(flashcardId, term, definition, flashcardSetId);
+                    DocumentReference flashcardRef = db.collection("flashcards").document(flashcardId);
+                    transaction.set(flashcardRef, flashcard);
+                    flashcardIds.add(flashcardId);
                 }
-
-                Flashcard flashcard = new Flashcard(flashcardId, term, definition, flashcardSetId);
-                Task<Void> saveTask = db.collection("flashcards").document(flashcardId).set(flashcard);
-                saveTasks.add(saveTask);
-
-                // Update the flashcard list in the set
-                db.collection("flashcardSet")
-                        .document(flashcardSetId)
-                        .update("flashcardList", FieldValue.arrayUnion(flashcardId));
             }
-        }
 
-        Tasks.whenAllComplete(saveTasks)
-                .addOnSuccessListener(tasks -> {
-                    showSaveSuccessDialog(flashcardSetId, title);
-                    Toast.makeText(this, "Flashcard set saved successfully", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Error saving flashcards: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            // Update flashcard list in the set
+            transaction.update(setRef, "flashcardList", flashcardIds);
+
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            if (loadingView != null) loadingView.setVisibility(View.GONE);
+            showSaveSuccessDialog(flashcardSetId, title);
+        }).addOnFailureListener(e -> {
+            if (loadingView != null) loadingView.setVisibility(View.GONE);
+            Toast.makeText(this, "Error saving flashcards: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
+
+//    @SuppressLint("SimpleDateFormat")
+//    private void saveFlashcardSet() {
+//        String title = titleEditText.getText().toString().trim();
+//        String description = descriptionEditText.getText().toString().trim();
+//
+//        if (title.isEmpty() || description.isEmpty()) {
+//            Toast.makeText(this, "Title and description cannot be empty.", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//
+//        FlashcardSet flashcardSet = new FlashcardSet();
+//        flashcardSet.setTitle(title);
+//        flashcardSet.setDescription(description);
+//        flashcardSet.setUserid(currentUserId);
+//        flashcardSet.setDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+//        flashcardSet.setLastAccessed(new Timestamp(new Date()));
+//
+//        // Handle create or update
+//        DocumentReference setRef = (flashcardSetId == null) ?
+//                db.collection("flashcardSet").document() : db.collection("flashcardSet").document(flashcardSetId);
+//
+//        flashcardSetId = setRef.getId();
+//        flashcardSet.setId(flashcardSetId);
+//
+//        setRef.set(flashcardSet)
+//                .addOnSuccessListener(aVoid -> saveFlashcard(flashcardSetId, title))
+//                .addOnFailureListener(e -> Toast.makeText(this, "Error saving flashcard set: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+//    }
+//
+//    private void saveFlashcard(String flashcardSetId, String title) {
+//        List<Task<Void>> saveTasks = new ArrayList<>();
+//
+//        for (int i = 0; i < flashcardsContainer.getChildCount(); i++) {
+//            View flashcardView = flashcardsContainer.getChildAt(i);
+//            EditText termEditText = flashcardView.findViewById(R.id.termEdit);
+//            EditText definitionEditText = flashcardView.findViewById(R.id.definitionEdit);
+//
+//            String term = termEditText.getText().toString().trim();
+//            String definition = definitionEditText.getText().toString().trim();
+//            String flashcardId = (String) flashcardView.getTag();
+//
+//            if (!term.isEmpty() && !definition.isEmpty()) {
+//                if (flashcardId == null) {
+//                    // This is a new flashcard
+//                    flashcardId = db.collection("flashcards").document().getId();
+//                    flashcardView.setTag(flashcardId);
+//                }
+//
+//                Flashcard flashcard = new Flashcard(flashcardId, term, definition, flashcardSetId);
+//                Task<Void> saveTask = db.collection("flashcards").document(flashcardId).set(flashcard);
+//                saveTasks.add(saveTask);
+//
+//                // Update the flashcard list in the set
+//                db.collection("flashcardSet")
+//                        .document(flashcardSetId)
+//                        .update("flashcardList", FieldValue.arrayUnion(flashcardId))
+////                        .addOnSuccessListener(tasks -> {
+////                            showSaveSuccessDialog(flashcardSetId, title);
+//////                            finish();
+////                        })
+//                        .addOnFailureListener(e -> Toast.makeText(this, "Error saving flashcards: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+//            }
+//        }
+//
+//        Tasks.whenAllComplete(saveTasks)
+//                .addOnSuccessListener(tasks -> {
+//                    showSaveSuccessDialog(flashcardSetId, title);
+////                    Toast.makeText(this, "Flashcard set saved successfully", Toast.LENGTH_SHORT).show();
+////                    finish();
+//                })
+//                .addOnFailureListener(e -> Toast.makeText(this, "Error saving flashcards: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+//    }
 
     private void showSaveSuccessDialog(String flashcardSetId, String title) {
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_saved_successfully);
+        dialog.setContentView(R.layout.dialog_saved_successfully_flashcard);
 
-        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+//        Button btnCancel = dialog.findViewById(R.id.btnCancel);
         Button btnOpen = dialog.findViewById(R.id.btnOpen);
 
-        btnCancel.setOnClickListener(v -> {
-            dialog.dismiss();
-            finish();
-        });
+//        btnCancel.setOnClickListener(v -> {
+//            dialog.dismiss();
+//            finish();
+//        });
 
         btnOpen.setOnClickListener(v -> {
             Intent intent = new Intent(this, FlashcardViewActivity.class);

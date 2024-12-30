@@ -39,18 +39,9 @@
                         android:id="@+id/termEdit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_toStartOf="@id/termMenuButton"
                         android:hint="Term"
                         android:textSize="16sp" />
 
-                    <ImageButton
-                        android:id="@+id/termMenuButton"
-                        android:layout_width="30dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentEnd="true"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Menu"
-                        android:src="@drawable/ic_more" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -63,18 +54,9 @@
                         android:id="@+id/definitionEdit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_toStartOf="@id/definitionMenuButton"
                         android:hint="Definition"
                         android:textSize="16sp" />
 
-                    <ImageButton
-                        android:id="@+id/definitionMenuButton"
-                        android:layout_width="30dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentEnd="true"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Menu"
-                        android:src="@drawable/ic_more" />
                 </RelativeLayout>
 
             </LinearLayout>
