@@ -1,6 +1,10 @@
 package com.example.smartypaws;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -17,6 +21,7 @@ import android.view.View;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 public class NotificationActivity extends AppCompatActivity {
 
@@ -64,7 +69,7 @@ public class NotificationActivity extends AppCompatActivity {
         findViewById(R.id.testNotificationButton).setOnClickListener(this::showNotification);
     }
 
-    private void scheduleNotification() {
+    /*private void scheduleNotification() {
         Calendar calendar = Calendar.getInstance();
         int selectedHour, selectedMinute;
 
@@ -114,7 +119,53 @@ public class NotificationActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "AlarmManager is not available", Toast.LENGTH_SHORT).show();
         }
+    }*/
+
+    private void scheduleNotification() {
+        // Get the time from the TimePicker
+        Calendar calendar = Calendar.getInstance();
+        int selectedHour, selectedMinute;
+
+        // Retrieve selected time from the TimePicker
+        if (Build.VERSION.SDK_INT >= 23) {
+            selectedHour = timePicker.getHour();
+            selectedMinute = timePicker.getMinute();
+        } else {
+            selectedHour = timePicker.getCurrentHour();
+            selectedMinute = timePicker.getCurrentMinute();
+        }
+
+        calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
+        calendar.set(Calendar.MINUTE, selectedMinute);
+        calendar.set(Calendar.SECOND, 0);
+
+        // Adjust time if it's in the past (schedule for the next day)
+        if (calendar.before(Calendar.getInstance())) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        // Calculate the delay in milliseconds until the scheduled time
+        long delay = calendar.getTimeInMillis() - System.currentTimeMillis();
+
+        // Create a PeriodicWorkRequest
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(NotificationWorker.class, 1, TimeUnit.DAYS)
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS)  // Delay until the notification time
+                .build();
+
+        // Enqueue the PeriodicWorkRequest with WorkManager
+        WorkManager.getInstance(this).enqueue(workRequest);
+
+        // Save selected time in SharedPreferences (optional)
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(PREF_HOUR, selectedHour);
+        editor.putInt(PREF_MINUTE, selectedMinute);
+        editor.apply();
+
+        Toast.makeText(this, "Notification scheduled for: " + calendar.getTime(), Toast.LENGTH_SHORT).show();
     }
+
+
 
 
     private void createNotificationChannel() {

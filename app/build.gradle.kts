@@ -55,6 +55,9 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("androidx.work:work-runtime:2.8.0")
+    implementation("com.google.guava:guava:30.1-android")
+
 
     // Firebase dependencies
     implementation("com.google.firebase:firebase-firestore:25.1.1")
