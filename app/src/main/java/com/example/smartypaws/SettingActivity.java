@@ -55,8 +55,8 @@ public class SettingActivity extends AppCompatActivity {
         notificationCard.setOnClickListener(v -> openNotificationSettings());
 
         // Leave a Review
-        CardView leaveReviewCard = findViewById(R.id.leaveReviewCard);
-        leaveReviewCard.setOnClickListener(v -> openPlayStoreReview());
+//        CardView leaveReviewCard = findViewById(R.id.leaveReviewCard);
+//        leaveReviewCard.setOnClickListener(v -> openPlayStoreReview());
 
         // Submit Feedback
         CardView submitFeedbackCard = findViewById(R.id.submitFeedbackCard);
@@ -83,18 +83,18 @@ public class SettingActivity extends AppCompatActivity {
 
     }
 
-    private void openPlayStoreReview() {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("market://details?id=" + getPackageName()));
-            startActivity(intent);
-        } catch (Exception e) {
-            // If Play Store app is not available, open in browser
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName()));
-            startActivity(intent);
-        }
-    }
+//    private void openPlayStoreReview() {
+//        try {
+//            Intent intent = new Intent(Intent.ACTION_VIEW);
+//            intent.setData(Uri.parse("market://details?id=" + getPackageName()));
+//            startActivity(intent);
+//        } catch (Exception e) {
+//            // If Play Store app is not available, open in browser
+//            Intent intent = new Intent(Intent.ACTION_VIEW);
+//            intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName()));
+//            startActivity(intent);
+//        }
+//    }
 
     private void openFeedbackForm() {
         // TODO: Implement feedback form activity
