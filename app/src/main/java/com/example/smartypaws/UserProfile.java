@@ -5,6 +5,13 @@ public class UserProfile {
     private String email;
     private String location;
     private String about;
+
+    public UserProfile(String displayName, String location, String about) {
+        this.name = displayName;
+        this.location = location;
+        this.about = about;
+    }
+
     public String getName() {
         return name;
     }

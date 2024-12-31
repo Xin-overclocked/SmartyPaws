@@ -36,18 +36,22 @@ public class ProfileActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private ImageButton settingButton;
     private Button editButton;
-    ActivityMainBinding binding;
+//    ActivityMainBinding binding;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private TextView profileName;
     private TextView location;
     private TextView quizCount;
     private TextView flashcardCount;
+    private TextView about;
     private String currentUserId;
     private CollectionReference quizzesRef;
     private CollectionReference flashcardSetsRef;
+    private CollectionReference userRef;
     private ListenerRegistration flashcardListener;
     private ListenerRegistration quizListener;
+
+    private ListenerRegistration userListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         quizzesRef = db.collection("quizzes");
         flashcardSetsRef = db.collection("flashcardSet");
+        userRef = db.collection("users");
 
         // Get currentUserId after Firebase initialization
         if (auth.getCurrentUser() == null) {
@@ -74,6 +79,7 @@ public class ProfileActivity extends AppCompatActivity {
         // Initialize views
         profileName = findViewById(R.id.profile_name);
         location = findViewById(R.id.profile_location);
+        about = findViewById(R.id.about_text);
         quizCount = findViewById(R.id.quiz_added);
         flashcardCount = findViewById(R.id.flashcards_count);
         fab = findViewById(R.id.fabAdd);
@@ -124,13 +130,14 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         // Fetch user profile data
-        db.collection("users").document(currentUserId)
+        userRef.document(currentUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         // Update profile information
                         String name = documentSnapshot.getString("name");
                         String userLocation = documentSnapshot.getString("location");
+                        String aboutText = documentSnapshot.getString("about");
 
                         // Check for null values before setting text
                         if (name != null) {
@@ -138,6 +145,9 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                         if (userLocation != null) {
                             location.setText(userLocation);
+                        }
+                        if (aboutText != null) {
+                            about.setText(aboutText);
                         }
                     } else {
                         Toast.makeText(ProfileActivity.this,
@@ -150,15 +160,29 @@ public class ProfileActivity extends AppCompatActivity {
                             "Error fetching profile: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
-
-        // Setup real-time counters
-        setupRealtimeCounts();
     }
 
     private void setupRealtimeCounts() {
         if (currentUserId == null) {
             return;
         }
+
+        // Setup real-time listener for flashcard sets
+        userListener = userRef
+                .whereEqualTo("userid", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Error listening to flashcards: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        flashcardCount.setText(String.valueOf(snapshots.size()));
+                    }
+                });
+
 
         // Setup real-time listener for flashcard sets
         flashcardListener = flashcardSetsRef
@@ -196,18 +220,97 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        setupRealtimeCounts();
+        setupRealtimeUpdates();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Remove listeners when activity is not visible
+        // Remove all listeners when activity is not visible
+        removeListeners();
+    }
+
+    private void setupRealtimeUpdates() {
+        if (currentUserId == null) {
+            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Setup real-time listener for user profile
+        userListener = userRef.document(currentUserId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Error listening to profile updates: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        // Update profile information
+                        String name = documentSnapshot.getString("name");
+                        String userLocation = documentSnapshot.getString("location");
+                        String aboutText = documentSnapshot.getString("about");
+
+                        // Update UI with null checks
+                        if (name != null) {
+                            profileName.setText(name);
+                        }
+                        if (userLocation != null) {
+                            location.setText(userLocation);
+                        }
+                        if (aboutText != null) {
+                            about.setText(aboutText);
+                        }
+                    } else {
+                        Toast.makeText(ProfileActivity.this,
+                                "User profile not found",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        // Setup real-time listener for flashcard sets
+        flashcardListener = flashcardSetsRef
+                .whereEqualTo("userid", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Error listening to flashcards: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        flashcardCount.setText(String.valueOf(snapshots.size()));
+                    }
+                });
+
+        // Setup real-time listener for quizzes
+        quizListener = quizzesRef
+                .whereEqualTo("userId", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Error listening to quizzes: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        quizCount.setText(String.valueOf(snapshots.size()));
+                    }
+                });
+    }
+
+    private void removeListeners() {
         if (flashcardListener != null) {
             flashcardListener.remove();
         }
         if (quizListener != null) {
             quizListener.remove();
+        }
+        if (userListener != null) {
+            userListener.remove();
         }
     }
 

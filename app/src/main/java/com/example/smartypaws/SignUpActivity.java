@@ -99,6 +99,8 @@ public class SignUpActivity extends AppCompatActivity {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
         user.put("email", email);
+        user.put("about", "This is a about");
+        user.put("location", "Malaysia is here");
 
         db.collection("users").document(userId)
                 .set(user)
