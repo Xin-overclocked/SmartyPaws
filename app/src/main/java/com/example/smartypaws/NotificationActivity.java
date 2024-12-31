@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,10 @@ public class NotificationActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "my_channel";
     private static final int NOTIFICATION_ID = 1;
 
+    private static final String PREFS_NAME = "NotificationPrefs";
+    private static final String PREF_HOUR = "NotificationHour";
+    private static final String PREF_MINUTE = "NotificationMinute";
+
     private NotificationManager notificationManager;
     private TimePicker timePicker;
 
@@ -35,13 +40,17 @@ public class NotificationActivity extends AppCompatActivity {
 
         timePicker = findViewById(R.id.timePicker);
 
-        // Set the default time to 9:00 AM
+        // Retrieve saved time from SharedPreferences
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int savedHour = preferences.getInt(PREF_HOUR, 9); // Default to 9 AM
+        int savedMinute = preferences.getInt(PREF_MINUTE, 0); // Default to 0 minutes
+
         if (Build.VERSION.SDK_INT >= 23) {
-            timePicker.setHour(9);
-            timePicker.setMinute(0);
+            timePicker.setHour(savedHour);
+            timePicker.setMinute(savedMinute);
         } else {
-            timePicker.setCurrentHour(9);
-            timePicker.setCurrentMinute(0);
+            timePicker.setCurrentHour(savedHour);
+            timePicker.setCurrentMinute(savedMinute);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -50,31 +59,31 @@ public class NotificationActivity extends AppCompatActivity {
             }
         }
 
-        // Back button listener
         findViewById(R.id.backButton).setOnClickListener(v -> finish());
-
-        // Set button listener
         findViewById(R.id.setButton).setOnClickListener(v -> scheduleNotification());
-
-        // Test notification button listener
         findViewById(R.id.testNotificationButton).setOnClickListener(this::showNotification);
     }
 
-
     private void scheduleNotification() {
         Calendar calendar = Calendar.getInstance();
+        int selectedHour, selectedMinute;
+
+        // Retrieve selected time from the TimePicker
         if (Build.VERSION.SDK_INT >= 23) {
-            calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
-            calendar.set(Calendar.MINUTE, timePicker.getMinute());
+            selectedHour = timePicker.getHour();
+            selectedMinute = timePicker.getMinute();
         } else {
-            calendar.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
-            calendar.set(Calendar.MINUTE, timePicker.getCurrentMinute());
+            selectedHour = timePicker.getCurrentHour();
+            selectedMinute = timePicker.getCurrentMinute();
         }
+
+        calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
+        calendar.set(Calendar.MINUTE, selectedMinute);
         calendar.set(Calendar.SECOND, 0);
 
+        // Adjust time if it's in the past
         if (calendar.before(Calendar.getInstance())) {
-            // Schedule for the next day if the time has already passed.
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            calendar.add(Calendar.DAY_OF_MONTH, 1); // Schedule for the next day
         }
 
         Intent intent = new Intent(this, NotificationReceiver.class);
@@ -93,6 +102,14 @@ public class NotificationActivity extends AppCompatActivity {
                     AlarmManager.INTERVAL_DAY, // Repeat daily
                     pendingIntent
             );
+
+            // Save selected time in SharedPreferences
+            SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt(PREF_HOUR, selectedHour);
+            editor.putInt(PREF_MINUTE, selectedMinute);
+            editor.apply();
+
             Toast.makeText(this, "Notification scheduled for: " + calendar.getTime(), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "AlarmManager is not available", Toast.LENGTH_SHORT).show();
@@ -100,45 +117,35 @@ public class NotificationActivity extends AppCompatActivity {
     }
 
 
-
-
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence channelName = "Study Reminder Channel";
-            String channelDescription = "Channel for daily study reminders";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Daily Reminder",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            channel.setDescription("Channel for daily notifications");
 
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
-            channel.setDescription(channelDescription);
-
-            notificationManager.createNotificationChannel(channel);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
+
 
     public void showNotification(View view) {
         try {
-            Intent intent = new Intent(this, NotificationActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+            Intent intent = new Intent(this, NotificationReceiver.class);
+            intent.putExtra("notification_id", NOTIFICATION_ID);
 
-            Notification.Builder builder;
+            // Trigger the NotificationReceiver
+            sendBroadcast(intent);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                builder = new Notification.Builder(this, CHANNEL_ID)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("SMARTY PAWS")
-                        .setContentText("Time to study!")
-                        .setPriority(Notification.PRIORITY_DEFAULT)
-                        .setContentIntent(pendingIntent)
-                        .setAutoCancel(true);
-
-                Notification notification = builder.build();
-                notificationManager.notify(NOTIFICATION_ID, notification);
-                Log.d("NotificationActivity", "Notification sent successfully!");
-            } else {
-                Log.e("NotificationActivity", "Notifications are not supported on this device version.");
-            }
+            Log.d("NotificationActivity", "Broadcast sent to NotificationReceiver");
         } catch (Exception e) {
-            Log.e("NotificationActivity", "Error showing notification", e);
+            Log.e("NotificationActivity", "Error sending broadcast to NotificationReceiver", e);
         }
     }
+
 }
