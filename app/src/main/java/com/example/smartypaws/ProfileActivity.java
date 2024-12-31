@@ -1,5 +1,6 @@
 package com.example.smartypaws;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -7,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +21,12 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,16 +37,47 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageButton settingButton;
     private Button editButton;
     ActivityMainBinding binding;
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private TextView profileName;
+    private TextView location;
+    private TextView quizCount;
+    private TextView flashcardCount;
+    private String currentUserId;
+    private CollectionReference quizzesRef;
+    private CollectionReference flashcardSetsRef;
+    private ListenerRegistration flashcardListener;
+    private ListenerRegistration quizListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        barChart = findViewById(R.id.bar_chart);
+        // Initialize Firebase instances first
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+        quizzesRef = db.collection("quizzes");
+        flashcardSetsRef = db.collection("flashcardSet");
+
+        // Get currentUserId after Firebase initialization
+        if (auth.getCurrentUser() == null) {
+            // Handle the case where user is not logged in
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+            // Redirect to login activity or handle appropriately
+            finish();
+            return;
+        }
+
+        currentUserId = auth.getCurrentUser().getUid();
+
+        // Initialize views
+        profileName = findViewById(R.id.profile_name);
+        location = findViewById(R.id.profile_location);
+        quizCount = findViewById(R.id.quiz_added);
+        flashcardCount = findViewById(R.id.flashcards_count);
         fab = findViewById(R.id.fabAdd);
 
-        setupBarChart();
         setupFAB();
 
         // Set up setting button
@@ -55,89 +95,179 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         // Set up bottom navigation
+        setupBottomNavigation();
+
+        // Fetch user data and setup real-time counters
+        fetchUserDataAndCounts();
+    }
+
+    private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//                    overrideActivityTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                    finish();
-                    return true;
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
+                return true;
             }
             if (item.getItemId() == R.id.nav_profile) {
-                    return true;
+                return true;
             }
             return false;
         });
-
     }
 
-    private void setupBarChart() {
-        List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0f, 4f));
-        entries.add(new BarEntry(1f, 3f));
-        entries.add(new BarEntry(2f, 5f));
-        entries.add(new BarEntry(3f, 2f));
-        entries.add(new BarEntry(4f, 4f));
-        entries.add(new BarEntry(5f, 3f));
-        entries.add(new BarEntry(6f, 6f));
+    private void fetchUserDataAndCounts() {
+        if (currentUserId == null) {
+            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        BarDataSet set = new BarDataSet(entries, "Screen Time");
-        set.setColor(Color.parseColor("#553479"));
+        // Fetch user profile data
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Update profile information
+                        String name = documentSnapshot.getString("name");
+                        String userLocation = documentSnapshot.getString("location");
 
-        BarData data = new BarData(set);
-        data.setBarWidth(0.5f);
+                        // Check for null values before setting text
+                        if (name != null) {
+                            profileName.setText(name);
+                        }
+                        if (userLocation != null) {
+                            location.setText(userLocation);
+                        }
+                    } else {
+                        Toast.makeText(ProfileActivity.this,
+                                "User profile not found",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ProfileActivity.this,
+                            "Error fetching profile: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
 
-        barChart.setData(data);
-        barChart.getDescription().setEnabled(false);
-        barChart.getLegend().setEnabled(false);
-        barChart.getAxisLeft().setTextColor(Color.BLACK);
-        barChart.getAxisRight().setEnabled(false);
-        barChart.getXAxis().setTextColor(Color.BLACK);
+        // Setup real-time counters
+        setupRealtimeCounts();
+    }
 
-        String[] days = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(days));
+    private void setupRealtimeCounts() {
+        if (currentUserId == null) {
+            return;
+        }
 
-        barChart.invalidate();
+        // Setup real-time listener for flashcard sets
+        flashcardListener = flashcardSetsRef
+                .whereEqualTo("userid", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Error listening to flashcards: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        flashcardCount.setText(String.valueOf(snapshots.size()));
+                    }
+                });
+
+        // Setup real-time listener for quizzes
+        quizListener = quizzesRef
+                .whereEqualTo("userId", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(ProfileActivity.this,
+                                "Error listening to quizzes: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        quizCount.setText(String.valueOf(snapshots.size()));
+                    }
+                });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setupRealtimeCounts();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Remove listeners when activity is not visible
+        if (flashcardListener != null) {
+            flashcardListener.remove();
+        }
+        if (quizListener != null) {
+            quizListener.remove();
+        }
     }
 
     private void setupFAB() {
-        // Set up FAB click listener
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create a dialog instance
                 Dialog dialog = new Dialog(ProfileActivity.this);
                 dialog.setContentView(R.layout.plus_btn_options);
 
-                // Reference buttons inside the dialog
                 Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
                 Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
 
-                // Set click listeners for the dialog buttons
                 createFlashcard.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Action for creating a new flashcard
                         startActivity(new Intent(getApplicationContext(), FlashcardEditActivity.class));
                         dialog.dismiss();
-
                     }
                 });
 
                 createQuiz.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Action for creating a new quiz
                         startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
                         dialog.dismiss();
                     }
                 });
 
-                // Show the dialog
                 dialog.show();
             }
         });
     }
-
 }
+
+//    private void setupBarChart() {
+//        List<BarEntry> entries = new ArrayList<>();
+//        entries.add(new BarEntry(0f, 4f));
+//        entries.add(new BarEntry(1f, 3f));
+//        entries.add(new BarEntry(2f, 5f));
+//        entries.add(new BarEntry(3f, 2f));
+//        entries.add(new BarEntry(4f, 4f));
+//        entries.add(new BarEntry(5f, 3f));
+//        entries.add(new BarEntry(6f, 6f));
+//
+//        BarDataSet set = new BarDataSet(entries, "Screen Time");
+//        set.setColor(Color.parseColor("#553479"));
+//
+//        BarData data = new BarData(set);
+//        data.setBarWidth(0.5f);
+//
+//        barChart.setData(data);
+//        barChart.getDescription().setEnabled(false);
+//        barChart.getLegend().setEnabled(false);
+//        barChart.getAxisLeft().setTextColor(Color.BLACK);
+//        barChart.getAxisRight().setEnabled(false);
+//        barChart.getXAxis().setTextColor(Color.BLACK);
+//
+//        String[] days = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+//        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(days));
+//
+//        barChart.invalidate();
+//    }
