@@ -127,8 +127,9 @@ public class EditProfileActivity extends AppCompatActivity {
         UserProfile userProfile = new UserProfile(displayName, location, about);
 
         // Save to Firebase
+        // Update only the specified fields
         db.collection("users").document(currentUserId)
-                .set(userProfile)
+                .update("name", displayName, "location", location, "about", about)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(EditProfileActivity.this,
                             "Profile updated successfully",
