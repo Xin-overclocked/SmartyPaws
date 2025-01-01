@@ -52,7 +52,9 @@ public class QuizViewActivity extends AppCompatActivity {
         Button studyButton = findViewById(R.id.studyButton);
 
         // Set click listeners
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v-> {
+            startActivity(new Intent(this, MainActivity.class));
+        });
         menuButton.setOnClickListener(this::showOptionsMenu);
         studyButton.setOnClickListener(v -> startStudyMode());
 
