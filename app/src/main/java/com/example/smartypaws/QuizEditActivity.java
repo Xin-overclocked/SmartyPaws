@@ -92,6 +92,8 @@ public class QuizEditActivity extends AppCompatActivity {
         findViewById(R.id.createFromFlashcardButton).setOnClickListener(v -> {
             // Implement create quiz from flashcard functionality
 //            createQuizFromFlashcards();
+            Intent intent = new Intent(QuizEditActivity.this, FlashcardSelection.class);
+            startActivity(intent);
         });
     }
 
