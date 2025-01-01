@@ -31,6 +31,13 @@ public class Quiz implements StudyItem  {
         this.description = description;
     }
 
+    public Quiz(String id, String title, String description, Timestamp lastAccessed) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.lastAccessed = lastAccessed;
+    }
+
     // Getters and setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
