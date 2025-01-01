@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -378,19 +379,39 @@ public class QuizEditActivity extends AppCompatActivity {
 //        }
 
         Quiz quiz = new Quiz(userId, title, description, createdAt, lastAccessed, questions);
+        if (quizId != null) {
+            updateExistingQuiz(quiz, quizId);
+        } else {
+            createNewQuiz(quiz);
+        }
+    }
 
-        // Save to Firestore
+
+    private void updateExistingQuiz(Quiz quiz, String quizId) {
+        quiz.setId(quizId);
+        Log.d("QuizEditActivity", String.valueOf(quiz));
+        db.collection("quizzes").document(quizId)
+                .set(quiz)
+                .addOnSuccessListener(aVoid -> {
+                    showSaveSuccessDialog(quizId, quiz.getTitle());
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error updating quiz: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void createNewQuiz(Quiz quiz) {
         db.collection("quizzes")
                 .add(quiz)
                 .addOnSuccessListener(documentReference -> {
-                    String quizId = documentReference.getId();
-                    quiz.setId(quizId);
+                    String newQuizId = documentReference.getId();
+                    quiz.setId(newQuizId);
 
                     // Update the document with the new ID
-                    db.collection("quizzes").document(quizId)
+                    db.collection("quizzes").document(newQuizId)
                             .set(quiz)
                             .addOnSuccessListener(aVoid -> {
-                                showSaveSuccessDialog(quizId, title);
+                                showSaveSuccessDialog(newQuizId, quiz.getTitle());
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(this, "Error updating quiz with ID: " + e.getMessage(), Toast.LENGTH_SHORT).show();
