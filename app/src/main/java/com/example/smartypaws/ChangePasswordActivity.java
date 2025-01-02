@@ -50,16 +50,16 @@ public class ChangePasswordActivity extends AppCompatActivity {
             newPasswordInput.setError("New password is required");
             return;
         }
+        if (!PasswordUtils.isStrongPassword(newPassword)) {
+            newPasswordInput.setError("Please enter a strong password");
+            return;
+        }
         if (TextUtils.isEmpty(confirmPassword)) {
             confirmPasswordInput.setError("Please confirm your new password");
             return;
         }
         if (!newPassword.equals(confirmPassword)) {
             confirmPasswordInput.setError("Passwords do not match");
-            return;
-        }
-        if (newPassword.length() < 6) {
-            newPasswordInput.setError("Password must be at least 6 characters");
             return;
         }
 

@@ -127,6 +127,7 @@
                 android:backgroundTint="#7948AE"
                 android:padding="16dp"
                 android:textAllCaps="false"
+                android:visibility="invisible"
                 app:cornerRadius="24dp"/>
 
             <com.google.android.material.button.MaterialButton
@@ -137,6 +138,7 @@
                 android:padding="16dp"
                 android:textAllCaps="false"
                 android:layout_marginLeft="12dp"
+                android:visibility="invisible"
                 app:cornerRadius="24dp"/>
         </LinearLayout>
 

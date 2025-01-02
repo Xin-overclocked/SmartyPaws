@@ -23,7 +23,7 @@ public class ScoreFragment extends Fragment {
     private int correctAns, noOfQn;
     private double score;
     private TextView tvTotalQn, tvCorrectAns, tvScore;
-    private MaterialButton btnRetake, btnMainMenu;
+    private MaterialButton btnRetake;
 
 
     @Override
@@ -42,7 +42,6 @@ public class ScoreFragment extends Fragment {
         tvScore = view.findViewById(R.id.tvScore);
 
         btnRetake = view.findViewById(R.id.btnRetake);
-        btnMainMenu = view.findViewById(R.id.btnMainMenu);
 
 
         if (getArguments() != null) {
