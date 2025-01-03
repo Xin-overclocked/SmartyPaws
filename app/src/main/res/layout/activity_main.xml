@@ -57,16 +57,16 @@
                     app:cardCornerRadius="24dp"
                     app:cardElevation="4dp">
 
-                    <EditText
-                        android:id="@+id/searchEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@null"
-                        android:drawableStart="@drawable/ic_search"
-                        android:drawablePadding="12dp"
-                        android:hint="Search Here"
-                        android:paddingHorizontal="16dp"
-                        android:singleLine="true"/>
+<!--                    <EditText-->
+<!--                        android:id="@+id/searchEditText"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="48dp"-->
+<!--                        android:background="@null"-->
+<!--                        android:drawableStart="@drawable/ic_search"-->
+<!--                        android:drawablePadding="12dp"-->
+<!--                        android:hint="Search Here"-->
+<!--                        android:paddingHorizontal="16dp"-->
+<!--                        android:singleLine="true"/>-->
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
