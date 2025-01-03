@@ -255,9 +255,9 @@ public class QuizViewActivity extends AppCompatActivity {
 
 
     private void startStudyMode() {
-//        Intent studyIntent = new Intent(this, QuizStudyActivity.class);
-//        studyIntent.putExtra("QUIZ_ID", quizId);
-//        startActivity(studyIntent);
+        Intent studyIntent = new Intent(this, PlayQuizActivity.class);
+        studyIntent.putExtra("QUIZ_ID", quizId);
+        startActivity(studyIntent);
     }
 }
 

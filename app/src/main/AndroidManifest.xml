@@ -19,6 +19,9 @@
             android:name=".FlashcardSelection"
             android:exported="false" />
         <activity
+            android:name=".PlayQuizActivity"
+            android:exported="false" />
+        <activity
             android:name=".ChangePasswordActivity"
             android:exported="false" />
         <activity
@@ -42,7 +45,6 @@
         <activity android:name=".SettingActivity" />
         <activity android:name=".FeedbackActivity" />
         <activity android:name=".NotificationActivity" />
-
         <receiver android:name=".NotificationReceiver" />
         <receiver android:name=".ChangePasswordActivity" />
     </application>
