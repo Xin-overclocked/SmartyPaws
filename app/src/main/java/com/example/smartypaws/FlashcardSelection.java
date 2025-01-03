@@ -72,12 +72,12 @@ public class FlashcardSelection extends AppCompatActivity {
             if (selectedSet != null) {
                 int noOfFlashcard = selectedSet.getFlashcardList().size();
 
-                if (noOfFlashcard > 1) {
+                if (noOfFlashcard > 3) {
                     Log.d("FlashcardSetId", "Selected set ID: " + selectedSet.getId());
                     fetchFlashcardsAndGenerateQuiz(selectedSet);
                     Log.d("ButtonClick", "Generate Quiz button clicked");
                 } else {
-                    Toast.makeText(this, "Flashcards in flashcard set must be more than 1", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Flashcards in flashcard set must be more than 3", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(this, "Please select a flashcard set", Toast.LENGTH_SHORT).show();
