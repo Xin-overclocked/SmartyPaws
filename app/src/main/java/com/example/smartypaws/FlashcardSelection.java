@@ -21,6 +21,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class FlashcardSelection extends AppCompatActivity {
 
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.myFlashcardsRecyclerView);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // 2 columns grid
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         // Load flashcardSets from Firebase
         loadFlashcardSets();
@@ -69,15 +70,26 @@ public class FlashcardSelection extends AppCompatActivity {
             FlashcardSet selectedSet = flashcardAdapter.getSelectedFlashcardSet();
 
             if (selectedSet != null) {
-                Log.d("FlashcardSetId", "Selected set ID: " + selectedSet.getId());
-                fetchFlashcardsAndGenerateQuiz(selectedSet);
-                Log.d("ButtonClick", "Generate Quiz button clicked");
+                int noOfFlashcard = selectedSet.getFlashcardList().size();
+
+                if (noOfFlashcard > 1) {
+                    Log.d("FlashcardSetId", "Selected set ID: " + selectedSet.getId());
+                    fetchFlashcardsAndGenerateQuiz(selectedSet);
+                    Log.d("ButtonClick", "Generate Quiz button clicked");
+                } else {
+                    Toast.makeText(this, "Flashcards in flashcard set must be more than 1", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(this, "Please select a flashcard set", Toast.LENGTH_SHORT).show();
             }
         });
 
-        findViewById(R.id.backButton).setOnClickListener(v -> finish());
+        findViewById(R.id.backButton).setOnClickListener(v -> {
+            Intent intent = new Intent(this, QuizViewActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
     }
     private void loadFlashcardSets() {
         db.collection("flashcardSet")
@@ -114,13 +126,25 @@ public class FlashcardSelection extends AppCompatActivity {
                     if (!flashcards.isEmpty()) {
                         Quiz quiz = createQuiz(selectedSet, flashcards);
                         Log.d("Cretead QUIZZZ", "CREATED QUIZZZZ set ID: " + selectedSet.getId());
-                        saveQuizToFirebase(quiz);
+                        generateQuizDisplayEditQuiz(quiz);
+//                        saveQuizToFirebase(quiz);
                     } else {
                         Toast.makeText(this, "No flashcards found in this set", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Error loading flashcards", Toast.LENGTH_SHORT).show());
     }
+
+    public void generateQuizDisplayEditQuiz(Quiz quiz) {
+        Gson gson = new Gson();
+        String quizJson = gson.toJson(quiz);
+        Intent generateQuizIntent = new Intent(this, QuizEditActivity.class);
+        generateQuizIntent.putExtra("GENERATED_QUIZ", quizJson);
+        generateQuizIntent.putExtras(generateQuizIntent);
+        startActivity(generateQuizIntent);
+        finish(); // Optional: closes the current activity
+    }
+
     private Quiz createQuiz(FlashcardSet flashcardSet, List<Flashcard> flashcards) {
         String quizId = UUID.randomUUID().toString();
         String title = "Quiz for " + flashcardSet.getTitle();
@@ -169,9 +193,9 @@ public class FlashcardSelection extends AppCompatActivity {
 
         // Pre-filter unique incorrect answers
         List<String> incorrectAnswers = new ArrayList<>();
-        for (Flashcard flashcard : flashcards) {
-            if (!flashcard.getDefinition().equals(correctAnswer)) {
-                incorrectAnswers.add(flashcard.getDefinition());
+        for (int i = 0; i < 4; i++) {
+            if (!flashcards.get(i).getDefinition().equals(correctAnswer)) {
+                incorrectAnswers.add(flashcards.get(i).getDefinition());
             }
         }
 

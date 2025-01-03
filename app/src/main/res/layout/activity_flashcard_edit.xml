@@ -88,13 +88,13 @@
                 android:orientation="vertical"/>
 
             <!-- Upload Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/uploadButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Upload from document"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/medium_purple" />
+<!--            <com.google.android.material.button.MaterialButton-->
+<!--                android:id="@+id/uploadButton"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Upload from document"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:backgroundTint="@color/medium_purple" />-->
 
         </LinearLayout>
     </ScrollView>

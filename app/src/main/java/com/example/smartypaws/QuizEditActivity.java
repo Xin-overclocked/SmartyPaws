@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class QuizEditActivity extends AppCompatActivity {
     private View currentQuestionView;
     private View currentOptionView;
     private String quizId;
+    private String generatedQuiz;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,7 @@ public class QuizEditActivity extends AppCompatActivity {
 
         // Retrieve the quiz ID from the Intent
         quizId = getIntent().getStringExtra("QUIZ_ID");
+        generatedQuiz = getIntent().getStringExtra("GENERATED_QUIZ");
 
         // Display today's date
         TextView dateTextView = findViewById(R.id.dateText);
@@ -75,6 +78,8 @@ public class QuizEditActivity extends AppCompatActivity {
         // Fetch the quiz data if editing an existing quiz
         if (quizId != null) {
             loadQuizData(quizId);
+        } else if (generatedQuiz != null) {
+            loadGeneratedQuizData(generatedQuiz);
         } else {
             // Add initial quiz item
             addQuizItem();
@@ -95,6 +100,22 @@ public class QuizEditActivity extends AppCompatActivity {
             Intent intent = new Intent(QuizEditActivity.this, FlashcardSelection.class);
             startActivity(intent);
         });
+    }
+
+    private void loadGeneratedQuizData(String generatedQuiz) {
+        String quizJson = generatedQuiz;
+        Quiz quiz = new Gson().fromJson(quizJson, Quiz.class);
+
+        if (quiz != null) {
+            // Populate the UI fields with the quiz data
+            EditText titleEditText = findViewById(R.id.titleEditText);
+            EditText descriptionEditText = findViewById(R.id.descriptionEditText);
+            titleEditText.setText(quiz.getTitle());
+            descriptionEditText.setText(quiz.getDescription());
+
+            // Load questions and options
+            loadQuizQuestions(quiz.getQuestions());
+        }
     }
 
     private void loadQuizData(String quizId) {

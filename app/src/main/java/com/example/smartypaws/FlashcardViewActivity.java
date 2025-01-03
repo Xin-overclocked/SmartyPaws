@@ -67,7 +67,11 @@ public class FlashcardViewActivity extends AppCompatActivity {
         noOfCards = findViewById(R.id.numberOfFlashcard);
 
         // Set up buttons
-        findViewById(R.id.backButton).setOnClickListener(v -> finish());
+        findViewById(R.id.backButton).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
         findViewById(R.id.menuButton).setOnClickListener(v -> showMenu());
         findViewById(R.id.studyButton).setOnClickListener(v -> startStudyMode());
 

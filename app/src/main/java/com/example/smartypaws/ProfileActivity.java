@@ -345,32 +345,3 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 }
-
-//    private void setupBarChart() {
-//        List<BarEntry> entries = new ArrayList<>();
-//        entries.add(new BarEntry(0f, 4f));
-//        entries.add(new BarEntry(1f, 3f));
-//        entries.add(new BarEntry(2f, 5f));
-//        entries.add(new BarEntry(3f, 2f));
-//        entries.add(new BarEntry(4f, 4f));
-//        entries.add(new BarEntry(5f, 3f));
-//        entries.add(new BarEntry(6f, 6f));
-//
-//        BarDataSet set = new BarDataSet(entries, "Screen Time");
-//        set.setColor(Color.parseColor("#553479"));
-//
-//        BarData data = new BarData(set);
-//        data.setBarWidth(0.5f);
-//
-//        barChart.setData(data);
-//        barChart.getDescription().setEnabled(false);
-//        barChart.getLegend().setEnabled(false);
-//        barChart.getAxisLeft().setTextColor(Color.BLACK);
-//        barChart.getAxisRight().setEnabled(false);
-//        barChart.getXAxis().setTextColor(Color.BLACK);
-//
-//        String[] days = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-//        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(days));
-//
-//        barChart.invalidate();
-//    }
