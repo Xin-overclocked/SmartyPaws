@@ -1,6 +1,8 @@
 package com.example.smartypaws.PlayQuizFragment;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.*;
 
@@ -24,6 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -32,6 +35,8 @@ public class QuizPlayFragment extends Fragment {
     private TextView tvQn, tvProgress;
     private ImageButton btnPrev, btnNext;
     private MaterialButton btnOption1, btnOption2, btnOption3, btnOption4;
+
+    private MaterialButton[] btns;
     private ProgressBar progressBar;
 
     private Quiz quiz;
@@ -41,10 +46,12 @@ public class QuizPlayFragment extends Fragment {
     private int curQnIndex = 0;
     private int score = 0;
     private boolean[] scores;
+    private int[] selectedBtnI;
     private int noOfQn;
 
     private FirebaseFirestore db;
 
+    private MaterialButton selectedBtn;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -65,6 +72,7 @@ public class QuizPlayFragment extends Fragment {
         btnOption3 = view.findViewById(R.id.btnOption3);
         btnOption4 = view.findViewById(R.id.btnOption4);
         progressBar = view.findViewById(R.id.progressBar);
+        btns = new MaterialButton[]{btnOption1, btnOption2, btnOption3, btnOption4};
 
         db = FirebaseFirestore.getInstance();
         loadQuiz();
@@ -94,7 +102,6 @@ public class QuizPlayFragment extends Fragment {
                         qnList = quiz.getQuestions();
                         noOfQn = Math.min(getNoOfQn(), qnList.size());
                         loadQn(noOfQn);
-                        Toast.makeText(getActivity(), "quiz loaded successfully", Toast.LENGTH_SHORT).show();
 
                         displayQn();
                     } else {
@@ -121,15 +128,21 @@ public class QuizPlayFragment extends Fragment {
         }
 
         scores = new boolean[noOfQn];
+        selectedBtnI = new int[noOfQn];
+        Arrays.fill(selectedBtnI, -1);
     }
 
     private void displayQn() {
+        btnOption3.setVisibility(View.INVISIBLE);
+        btnOption4.setVisibility(View.INVISIBLE);
+
+        setSelectedBtn();
+
         //display qn
         Quiz.Question curQn = qnList.get(curQnIndex);
         tvQn.setText(curQn.getText());
 
         curOptions = curQn.getOptions();
-
 
         btnOption1.setText(curOptions.get(0).getText());
         btnOption2.setText(curOptions.get(1).getText());
@@ -142,23 +155,10 @@ public class QuizPlayFragment extends Fragment {
             btnOption4.setText(curOptions.get(3).getText());
         }
 
-        btnOption1.setOnClickListener(v -> {
-            checkAns(0);
-        });
-        btnOption2.setOnClickListener(v -> {
-            checkAns(1);
-        });
-
-        if (curOptions.size() > 2) {
-            btnOption3.setOnClickListener(v -> {
-                checkAns(2);
-            });
-        }
-
-        if (curOptions.size() > 3) {
-            btnOption4.setOnClickListener(v -> {
-                checkAns(3);
-            });
+        for (int i = 0; i < curOptions.size(); i++) {
+            int finalI = i;
+            btns[i].setOnClickListener(v->{checkAns(finalI);});
+            btns[i].setVisibility(View.VISIBLE);
         }
 
 
@@ -167,25 +167,45 @@ public class QuizPlayFragment extends Fragment {
         progressBar.setProgress((curQnIndex + 1) * 100 / noOfQn);
     }
 
+
+    private void setSelectedBtn() {
+        if (selectedBtnI[curQnIndex] != -1) {
+            btns[selectedBtnI[curQnIndex]].setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#553479")));
+
+        }
+        resetBtnAppearance();
+    }
+
+    private void resetBtnAppearance(){
+        for (int i = 0; i < btns.length; i++) {
+            if (i != selectedBtnI[curQnIndex]) {
+                btns[i].setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#7948AE")));
+            }
+        }
+    }
+
     private void checkAns(int selectedOptionIndex) {
+        selectedBtnI[curQnIndex] = selectedOptionIndex;
+
         if (curOptions.get(selectedOptionIndex).isCorrect()) {
             scores[curQnIndex] = true;
-            Toast.makeText(this.getActivity(), "Correct", Toast.LENGTH_SHORT).show();
         } else {
             scores[curQnIndex] = false;
         }
+
+        setSelectedBtn();
     }
 
     private void nextQn() {
         if (curQnIndex < qnList.size() - 1) {
-            if (scores[curQnIndex]) {
-                score++;
-            }
+
             curQnIndex++;
             displayQn();
         } else {
-            if (scores[curQnIndex]) {
-                score++;
+            for (int i = 0; i < scores.length; i++) {
+                if (scores[i]) {
+                    score++;
+                }
             }
 
             startScoreFragment();
