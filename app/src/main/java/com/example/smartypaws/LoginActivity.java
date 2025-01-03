@@ -56,9 +56,9 @@ public class LoginActivity extends AppCompatActivity {
 
         activityLoginBinding.loginButton.setOnClickListener(v -> performLogin());
 
-        activityLoginBinding.googleSignInButton.setOnClickListener(v -> {
-            signInWithGoogle();
-        });
+//        activityLoginBinding.googleSignInButton.setOnClickListener(v -> {
+//            signInWithGoogle();
+//        });
     }
 
     private void signInWithGoogle() {

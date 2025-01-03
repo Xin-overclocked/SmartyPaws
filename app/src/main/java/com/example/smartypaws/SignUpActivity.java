@@ -59,7 +59,7 @@ public class SignUpActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        activitySignupBinding.googleSignInButton.setOnClickListener(v -> signInWithGoogle());
+//        activitySignupBinding.googleSignInButton.setOnClickListener(v -> signInWithGoogle());
 
         activitySignupBinding.signUpButton.setOnClickListener(v -> setupAction());
     }
