@@ -2,6 +2,7 @@ package com.example.smartypaws;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -52,10 +53,15 @@ public class QuizViewActivity extends AppCompatActivity {
         Button studyButton = findViewById(R.id.studyButton);
 
         // Set click listeners
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v-> {
+            startActivity(new Intent(this, MainActivity.class));
+        });
         menuButton.setOnClickListener(this::showOptionsMenu);
         studyButton.setOnClickListener(v -> startStudyMode());
 
+        if(quizId == null) {
+            Log.e("QuizViewActivity", "Quiz ID is null");
+        }
         // Load quiz data
         loadQuizData(quizId);
     }
@@ -255,9 +261,9 @@ public class QuizViewActivity extends AppCompatActivity {
 
 
     private void startStudyMode() {
-//        Intent studyIntent = new Intent(this, QuizStudyActivity.class);
-//        studyIntent.putExtra("QUIZ_ID", quizId);
-//        startActivity(studyIntent);
+        Intent studyIntent = new Intent(this, PlayQuizActivity.class);
+        studyIntent.putExtra("QUIZ_ID", quizId);
+        startActivity(studyIntent);
     }
 }
 

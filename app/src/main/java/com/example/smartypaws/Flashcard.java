@@ -6,6 +6,8 @@ public class Flashcard {
     private String definition;
     private String flashcardSetId;
 
+    public Flashcard() {
+    }
 
     public Flashcard(String setId, String term, String definition, String flashcardSetId) {
         this.id = setId;

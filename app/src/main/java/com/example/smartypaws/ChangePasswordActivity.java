@@ -13,6 +13,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
@@ -62,16 +63,16 @@ public class ChangePasswordActivity extends AppCompatActivity {
             newPasswordInput.setError("New password is required"); // Display error if new password is empty
             return;
         }
+        if (!PasswordUtils.isStrongPassword(newPassword)) {
+            newPasswordInput.setError("Please enter a strong password");
+            return;
+        }
         if (TextUtils.isEmpty(confirmPassword)) {
             confirmPasswordInput.setError("Please confirm your new password"); // Display error if confirm password is empty
             return;
         }
         if (!newPassword.equals(confirmPassword)) {
             confirmPasswordInput.setError("Passwords do not match"); // Display error if new password and confirmation do not match
-            return;
-        }
-        if (newPassword.length() < 6) {
-            newPasswordInput.setError("Password must be at least 6 characters"); // Enforce minimum password length
             return;
         }
 

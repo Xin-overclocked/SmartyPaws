@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +20,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
@@ -27,7 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private ListenerRegistration flashcardsListener;
+    private ListenerRegistration quizzesListener;
     private RecyclerView recentlyStudiedRecyclerView;
     private RecyclerView myFlashcardsRecyclerView;
     private RecyclerView myQuizzesRecyclerView;
@@ -38,8 +42,10 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private CollectionReference quizzesRef;
     private CollectionReference flashcardSetsRef;
+    private CollectionReference userRef;
     private FirebaseAuth auth;
     private String currentUserId;
+    private TextView profileName;
     List<StudyItem> flashcardSetsList = new ArrayList<>();
     List<StudyItem> quizList = new ArrayList<>();
 
@@ -53,14 +59,10 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         quizzesRef = db.collection("quizzes");
         flashcardSetsRef = db.collection("flashcardSet");
+        userRef = db.collection("users");
 
-        // Setup SwipeRefreshLayout
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            fetchFlashcards();
-            fetchQuizzes();
-            swipeRefreshLayout.setRefreshing(false);
-        });
+        // Setup username
+        profileName = findViewById(R.id.name);
 
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
@@ -87,47 +89,43 @@ public class MainActivity extends AppCompatActivity {
 
         // Get the current user ID
         currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+        if (currentUserId == null) {
+            Log.e("MainActivity", "User ID is null. Ensure user is logged in.");
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+        Log.e("currentuserid", currentUserId);
 
         // Fetch quizzes from Firestore
-        fetchFlashcards();
-        fetchQuizzes();
+        setupRealtimeListeners();
+        fetchRecentlyStudied();
+//        fetchFlashcards();
+//        fetchQuizzes();
+        fetchRecentlyStudied();
 
         // Set up FAB click listener
         FloatingActionButton fab = findViewById(R.id.fabAdd);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create a dialog instance
-                Dialog dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.plus_btn_options);
+        fab.setOnClickListener(v -> {
+            // Create a dialog instance
+            Dialog dialog = new Dialog(MainActivity.this);
+            dialog.setContentView(R.layout.plus_btn_options);
 
-                // Reference buttons inside the dialog
-                Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
-                Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
+            // Reference buttons inside the dialog
+            Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
+            Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
 
-                // Set click listeners for the dialog buttons
-                createFlashcard.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Action for creating a new flashcard
-                        startActivity(new Intent(getApplicationContext(), FlashcardEditActivity.class));
-                        dialog.dismiss();
+            // Set click listeners for the dialog buttons
+            createFlashcard.setOnClickListener(view -> {
+                startActivity(new Intent(getApplicationContext(), FlashcardEditActivity.class));
+                dialog.dismiss();
+            });
 
-                    }
-                });
+            createQuiz.setOnClickListener(view -> {
+                startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
+                dialog.dismiss();
+            });
 
-                createQuiz.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Action for creating a new quiz
-                        startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
-                        dialog.dismiss();
-                    }
-                });
-
-                // Show the dialog
-                dialog.show();
-            }
+            // Show the dialog
+            dialog.show();
         });
 
         // Set up bottom navigation
@@ -139,13 +137,94 @@ public class MainActivity extends AppCompatActivity {
                 finish();
                 return true;
             }
-            if (item.getItemId() == R.id.nav_home) {
-                return true;
-            }
-            return false;
+            return item.getItemId() == R.id.nav_home;
         });
+        setProfileName();
+    }
 
+    private void setupRealtimeListeners() {
+        flashcardsListener = flashcardSetsRef
+                .whereEqualTo("userid", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Log.e("MainActivity", "Listen failed for flashcards.", error);
+                        Toast.makeText(MainActivity.this, "Failed to load flashcards", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
+                    if (snapshots != null) {
+                        List<StudyItem> flashcardSetsList = new ArrayList<>();
+                        for (DocumentSnapshot document : snapshots) {
+                            String title = document.getString("title");
+                            String description = document.getString("description");
+                            String id = document.getId();
+                            ArrayList<String> cardIds = (ArrayList<String>) document.get("flashcardList");
+                            String date = document.getString("date");
+                            String userid = document.getString("userid");
+                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description, cardIds, date, userid);
+                            flashcardSetsList.add(flashcardSet);
+                        }
+                        myFlashcardsAdapter.updateData(flashcardSetsList);
+                    }
+                });
+
+        quizzesListener = quizzesRef
+                .whereEqualTo("userId", currentUserId)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Log.e("MainActivity", "Listen failed for quizzes.", error);
+                        Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        List<StudyItem> quizList = new ArrayList<>();
+                        for (DocumentSnapshot document : snapshots) {
+                            String title = document.getString("title");
+                            String description = document.getString("description");
+                            String id = document.getId();
+                            Quiz quiz = new Quiz(id, title, description);
+                            quizList.add(quiz);
+                        }
+                        myQuizzesAdapter.updateData(quizList);
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove listeners when activity is destroyed
+        if (flashcardsListener != null) {
+            flashcardsListener.remove();
+        }
+        if (quizzesListener != null) {
+            quizzesListener.remove();
+        }
+    }
+
+    private void setProfileName() {
+        userRef.document(currentUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String name = documentSnapshot.getString("name");
+                        if (name != null) {
+                            profileName.setText(name);
+
+                        } else {
+                            Log.e("MainActivity", "Name field is null or missing in Firestore");
+                            profileName.setText("Unknown User");
+                        }
+                    } else {
+                        Log.e("MainActivity", "User document does not exist");
+                        Toast.makeText(MainActivity.this, "User profile not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("MainActivity", "Error fetching profile: " + e.getMessage());
+                    Toast.makeText(MainActivity.this, "Error fetching profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void fetchRecentlyStudied() {
