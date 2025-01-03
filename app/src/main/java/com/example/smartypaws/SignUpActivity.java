@@ -73,6 +73,8 @@ public class SignUpActivity extends AppCompatActivity {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
+        } else if (!PasswordUtils.isStrongPassword(password)) {
+            Toast.makeText(this, "Please enter a strong password", Toast.LENGTH_SHORT).show();
         } else {
             performSignUp(name, email, password);
         }
@@ -99,6 +101,8 @@ public class SignUpActivity extends AppCompatActivity {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
         user.put("email", email);
+        user.put("about", "This is a about");
+        user.put("location", "Malaysia is here");
 
         db.collection("users").document(userId)
                 .set(user)
@@ -153,4 +157,3 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 }
-

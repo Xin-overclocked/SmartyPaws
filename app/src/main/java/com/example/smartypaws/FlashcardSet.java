@@ -2,6 +2,7 @@ package com.example.smartypaws;
 
 import com.google.firebase.Timestamp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FlashcardSet implements StudyItem{
@@ -10,22 +11,45 @@ public class FlashcardSet implements StudyItem{
     private String date;
     private Timestamp lastAccessed;
     private String description;
-    private List<Flashcard> flashcardList;
+    private List<String> flashcardList;
+    private String userid;
 
     // Default constructor required for calls to DataSnapshot.getValue(FlashcardSet.class)
     public FlashcardSet() {}
 
-    public FlashcardSet(String title, String description, String date, Timestamp lastAccessed, List<Flashcard> flashcardList) {
+    public FlashcardSet(String title, String description, List<String> flashcardList, String date) {
         this.title = title;
         this.description = description;
-        this.date = date;
-        this.lastAccessed = lastAccessed;
         this.flashcardList = flashcardList;
+        this.date = date;
     }
 
     public FlashcardSet(String title,String description) {
         this.title = title;
         this.description = description;
+    }
+
+    public FlashcardSet(String id, String title, String description) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+    }
+
+    public FlashcardSet(String id, String title, String description, ArrayList<String> cardIds, String date) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.flashcardList = cardIds;
+        this.date = date;
+    }
+
+    public FlashcardSet(String id, String title, String description, ArrayList<String> cardIds, String date, String userid) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.flashcardList = cardIds;
+        this.date = date;
+        this.userid = userid;
     }
 
     // Getters and setters
@@ -38,7 +62,7 @@ public class FlashcardSet implements StudyItem{
 
     @Override
     public void setLastAccessed(Timestamp timestamp) {
-
+        lastAccessed = timestamp;
     }
 
     @Override
@@ -47,6 +71,16 @@ public class FlashcardSet implements StudyItem{
     }
 
     public void setDescription(String description) { this.description = description; }
-    public List<Flashcard> getFlashcardList() { return flashcardList; }
-    public void setFlashcards(List<Flashcard> flashcardList) { this.flashcardList = flashcardList; }
+    public List<String> getFlashcardList() { return flashcardList; }
+    public void setFlashcards(List<String> flashcardList) { this.flashcardList = flashcardList; }
+    public String getUserid() {
+        return userid;
+    }
+    public void setUserid(String userid) {
+        this.userid = userid;
+    }
+
+    public void setId(String flashcardSetId) {
+        id = flashcardSetId;
+    }
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_quiz"
+    app:startDestination="@id/destQuizSetting"
+    >
+
+    <fragment
+        android:id="@+id/destQuizSetting"
+        android:name="com.example.smartypaws.PlayQuizFragment.QuizSettingFragment">
+        <action android:id="@+id/action_destQuizSetting_to_destQuizPlay" app:destination="@id/destQuizPlay"/>
+        <argument
+            android:name="noOfQn"
+            app:argType="integer"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/destQuizPlay"
+        android:name="com.example.smartypaws.PlayQuizFragment.QuizPlayFragment">
+        <action android:id="@+id/action_destQuizPlay_to_scoreFragment" app:destination="@id/destScore"/>
+    </fragment>
+
+    <fragment android:id="@+id/destScore"
+        android:name="com.example.smartypaws.PlayQuizFragment.ScoreFragment"
+        android:label="fragment_score"
+        tools:layout="@layout/fragment_score">
+        <argument
+            android:name="score"
+            app:argType="integer"/>
+        <action android:id="@+id/action_destScore_to_destQuizPlay" app:destination="@id/destQuizPlay"/>
+    </fragment>
+
+</navigation>

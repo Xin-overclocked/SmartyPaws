@@ -53,7 +53,9 @@ public class QuizViewActivity extends AppCompatActivity {
         Button studyButton = findViewById(R.id.studyButton);
 
         // Set click listeners
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v-> {
+            startActivity(new Intent(this, MainActivity.class));
+        });
         menuButton.setOnClickListener(this::showOptionsMenu);
         studyButton.setOnClickListener(v -> startStudyMode());
 
@@ -225,13 +227,13 @@ public class QuizViewActivity extends AppCompatActivity {
         startActivity(editIntent);
     }
 
-    private void shareQuiz() {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this quiz!");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "I'm studying " + quiz.getTitle() + ". Join me!");
-        startActivity(Intent.createChooser(shareIntent, "Share via"));
-    }
+//    private void shareQuiz() {
+//        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//        shareIntent.setType("text/plain");
+//        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this quiz!");
+//        shareIntent.putExtra(Intent.EXTRA_TEXT, "I'm studying " + quiz.getTitle() + ". Join me!");
+//        startActivity(Intent.createChooser(shareIntent, "Share via"));
+//    }
 
     private void deleteQuiz() {
         new AlertDialog.Builder(this)
@@ -259,9 +261,9 @@ public class QuizViewActivity extends AppCompatActivity {
 
 
     private void startStudyMode() {
-//        Intent studyIntent = new Intent(this, QuizStudyActivity.class);
-//        studyIntent.putExtra("QUIZ_ID", quizId);
-//        startActivity(studyIntent);
+        Intent studyIntent = new Intent(this, PlayQuizActivity.class);
+        studyIntent.putExtra("QUIZ_ID", quizId);
+        startActivity(studyIntent);
     }
 }
 
