@@ -52,6 +52,16 @@ public class FlashcardSet implements StudyItem{
         this.userid = userid;
     }
 
+    public FlashcardSet(String id, String title, String description, ArrayList<String> cardIds, String date, String userid, Timestamp lastAccessed) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.flashcardList = cardIds;
+        this.date = date;
+        this.userid = userid;
+        this.lastAccessed = lastAccessed;
+    }
+
     // Getters and setters
     public String getId() { return id; }
     public String getTitle() { return title; }

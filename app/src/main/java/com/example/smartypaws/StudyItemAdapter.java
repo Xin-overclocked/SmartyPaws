@@ -28,6 +28,11 @@ public class StudyItemAdapter extends RecyclerView.Adapter<StudyItemAdapter.View
         notifyDataSetChanged();
     }
 
+    public List<StudyItem> getItems() {
+        return studyItems;
+    }
+
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

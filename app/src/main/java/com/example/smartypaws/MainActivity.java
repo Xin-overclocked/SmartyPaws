@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private String currentUserId;
     private TextView profileName;
+    List<StudyItem> flashcardSetsList = new ArrayList<>();
+    List<StudyItem> quizList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
         fetchRecentlyStudied();
 //        fetchFlashcards();
 //        fetchQuizzes();
-        fetchRecentlyStudied();
 
         // Set up FAB click listener
         FloatingActionButton fab = findViewById(R.id.fabAdd);
@@ -152,17 +153,19 @@ public class MainActivity extends AppCompatActivity {
 
                     if (snapshots != null) {
                         List<StudyItem> flashcardSetsList = new ArrayList<>();
-                        for (DocumentSnapshot document : snapshots) {
+                        for (QueryDocumentSnapshot document : snapshots) {
                             String title = document.getString("title");
                             String description = document.getString("description");
                             String id = document.getId();
                             ArrayList<String> cardIds = (ArrayList<String>) document.get("flashcardList");
                             String date = document.getString("date");
                             String userid = document.getString("userid");
-                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description, cardIds, date, userid);
+                            Timestamp lastAccessed = document.getTimestamp("lastAccessed");
+                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description, cardIds, date, userid, lastAccessed);
                             flashcardSetsList.add(flashcardSet);
                         }
                         myFlashcardsAdapter.updateData(flashcardSetsList);
+                        fetchRecentlyStudied();
                     }
                 });
 
@@ -180,11 +183,13 @@ public class MainActivity extends AppCompatActivity {
                         for (DocumentSnapshot document : snapshots) {
                             String title = document.getString("title");
                             String description = document.getString("description");
+                            Timestamp lastAccessed = document.getTimestamp("lastAccessed");
                             String id = document.getId();
-                            Quiz quiz = new Quiz(id, title, description);
+                            Quiz quiz = new Quiz(id, title, description, lastAccessed);
                             quizList.add(quiz);
                         }
                         myQuizzesAdapter.updateData(quizList);
+                        fetchRecentlyStudied();
                     }
                 });
     }
@@ -226,118 +231,82 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchRecentlyStudied() {
-        String userId = currentUserId;
         List<StudyItem> recentlyStudiedList = new ArrayList<>();
 
-        // Query for recently studied quizzes
-        db.collection("quizzes")
-                .whereEqualTo("userId", userId)
-                .orderBy("lastAccessed", Query.Direction.DESCENDING)
-                .limit(5)
-                .get()
-                .addOnSuccessListener(quizSnapshots -> {
-                    for (QueryDocumentSnapshot document : quizSnapshots) {
-                        Quiz quiz = document.toObject(Quiz.class);
-                        recentlyStudiedList.add(quiz);
-                    }
-                    fetchFlashcardsForRecentlyStudied(recentlyStudiedList);
-                })
-                .addOnFailureListener(e -> {
-                    // If quizzes fail to load, proceed with fetching flashcards
-                    fetchFlashcardsForRecentlyStudied(recentlyStudiedList);
-                });
-    }
+        // Add all flashcards and quizzes to the list
+        recentlyStudiedList.addAll(myFlashcardsAdapter.getItems());
+        recentlyStudiedList.addAll(myQuizzesAdapter.getItems());
 
-    private void fetchFlashcardsForRecentlyStudied(List<StudyItem> recentlyStudiedList) {
-        String userId = currentUserId;
-        db.collection("flashcards")
-                .whereEqualTo("userId", userId)
-                .orderBy("lastAccessed", Query.Direction.DESCENDING)
-                .limit(5)
-                .get()
-                .addOnSuccessListener(flashcardSnapshots -> {
-                    for (QueryDocumentSnapshot document : flashcardSnapshots) {
-                        FlashcardSet flashcardSet = document.toObject(FlashcardSet.class);
-                        recentlyStudiedList.add(flashcardSet);
-                    }
-                    finalizeRecentlyStudiedList(recentlyStudiedList);
-                })
-                .addOnFailureListener(e -> {
-                    // If flashcards fail to load, proceed with what we have
-                    finalizeRecentlyStudiedList(recentlyStudiedList);
-                });
-    }
+        // Sort the combined list by lastAccessed, handling nulls
+        recentlyStudiedList.sort((a, b) -> {
+            Timestamp timeA = a.getLastAccessed();
+            Timestamp timeB = b.getLastAccessed();
+            if (timeA == null && timeB == null) return 0;
+            if (timeA == null) return 1;
+            if (timeB == null) return -1;
+            return timeB.compareTo(timeA); // Descending order
+        });
 
-    private void finalizeRecentlyStudiedList(List<StudyItem> recentlyStudiedList) {
-        if (recentlyStudiedList.isEmpty()) {
-            // If both quizzes and flashcards failed to load or don't exist
-            Toast.makeText(MainActivity.this, "No recently studied items found", Toast.LENGTH_SHORT).show();
-            Log.e("MainActivity", "No recently studied items found");
-        } else {
-            // Sort the combined list by lastAccessed, handling nulls
-            recentlyStudiedList.sort((a, b) -> {
-                Timestamp timeA = a.getLastAccessed();
-                Timestamp timeB = b.getLastAccessed();
-                if (timeA == null && timeB == null) return 0;
-                if (timeA == null) return 1;
-                if (timeB == null) return -1;
-                return timeB.compareTo(timeA); // Descending order
-            });
-
-            // Limit to 5 items
-            if (recentlyStudiedList.size() > 5) {
-                recentlyStudiedList = recentlyStudiedList.subList(0, 5);
-            }
-
-            recentlyStudiedAdapter.updateData(recentlyStudiedList);
+        // Limit to 5 items
+        if (recentlyStudiedList.size() > 5) {
+            recentlyStudiedList = recentlyStudiedList.subList(0, 5);
         }
+
+        recentlyStudiedAdapter.updateData(recentlyStudiedList);
     }
 
-
-    private void fetchFlashcards() {
-        flashcardSetsRef
-                .whereEqualTo("userid", currentUserId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<StudyItem> flashcardSetsList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String title = document.getString("title");
-                            String description = document.getString("description");
-                            String id = document.getId();
-                            ArrayList<String> cardIds = (ArrayList<String>) document.get("flashcardList");
-                            String date = document.getString("date");
-                            String userid = document.getString("userid");
-                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description, cardIds, date, userid);
-                            flashcardSetsList.add(flashcardSet);
-                        }
-                        myFlashcardsAdapter.updateData(flashcardSetsList);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Failed to load flashcards", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void fetchQuizzes() {
-        quizzesRef
-                .whereEqualTo("userId", currentUserId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<StudyItem> quizList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String title = document.getString("title");
-                            String description = document.getString("description");
-                            String id = document.getId();
-                            Quiz quiz = new Quiz(id, title, description);
-                            quizList.add(quiz);
-                        }
-                        myQuizzesAdapter.updateData(quizList);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
+//    private void fetchFlashcards() {
+//        flashcardSetsList.clear();
+//        myFlashcardsAdapter.updateData(flashcardSetsList);
+//        flashcardSetsRef
+//                .whereEqualTo("userid", currentUserId)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            String title = document.getString("title");
+//                            String description = document.getString("description");
+//                            String id = document.getId();
+//                            ArrayList<String> cardIds = (ArrayList<String>) document.get("flashcardList");
+//                            String date = document.getString("date");
+//                            String userid = document.getString("userid");
+//                            Timestamp lastAccessed = document.getTimestamp("lastAccessed");
+//                            FlashcardSet flashcardSet = new FlashcardSet(id, title, description, cardIds, date, userid, lastAccessed);
+//                            flashcardSetsList.add(flashcardSet);
+//                        }
+//                        myFlashcardsAdapter.updateData(flashcardSetsList);
+//                        fetchRecentlyStudied(); // Update the recently studied section after fetching flashcards
+//                    } else {
+//                        Toast.makeText(MainActivity.this, "Failed to load flashcards", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
+//
+//    private void fetchQuizzes() {
+//        quizList.clear();
+//        myQuizzesAdapter.updateData(new ArrayList<>());
+//        quizzesRef
+//                .whereEqualTo("userId", currentUserId)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//                        List<StudyItem> quizList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            String title = document.getString("title");
+//                            String description = document.getString("description");
+//                            Timestamp lastAccessed = document.getTimestamp("lastAccessed");
+//                            String id = document.getId();
+//                            Quiz quiz = new Quiz(id, title, description, lastAccessed);
+//                            quizList.add(quiz);
+//                        }
+//                        myQuizzesAdapter.updateData(quizList);
+//                        fetchRecentlyStudied(); // Update the recently studied section after fetching quizzes
+//                    } else {
+//                        Toast.makeText(MainActivity.this, "Failed to load quizzes", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
 
     private void navigateToView(StudyItem studyItem) {
         if (studyItem instanceof FlashcardSet) {
