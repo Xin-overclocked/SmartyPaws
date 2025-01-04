@@ -8,13 +8,13 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_edit);
 
-        // Initialize Firebase first
+        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
@@ -53,10 +53,11 @@ public class EditProfileActivity extends AppCompatActivity {
         // Initialize views
         initializeViews();
 
-        // Set click listeners
+        // Setup listeners
+        setupLocationInput(); // Add custom functionality for location selection
         setupClickListeners();
 
-        // Load existing profile data
+        // Load profile data
         loadProfileData();
     }
 
@@ -68,6 +69,41 @@ public class EditProfileActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
     }
+
+    private void setupLocationInput() {
+        locationInput.setOnClickListener(v -> {
+            // Get the list of sorted countries
+            String[] countries = CountryStateData.getCountries();
+
+            // Show country selection dialog
+            new AlertDialog.Builder(this)
+                    .setTitle("Select Country")
+                    .setItems(countries, (dialog, which) -> {
+                        String selectedCountry = countries[which];
+
+                        // Get the sorted states for the selected country
+                        String[] states = CountryStateData.getStates(selectedCountry);
+
+                        // Show state selection dialog if states are available
+                        if (states.length > 0) {
+                            new AlertDialog.Builder(this)
+                                    .setTitle("Select State")
+                                    .setItems(states, (stateDialog, stateWhich) -> {
+                                        String selectedState = states[stateWhich];
+                                        // Combine state and country
+                                        locationInput.setText(String.format("%s, %s", selectedState, selectedCountry));
+                                    })
+                                    .show();
+                        } else {
+                            // No states available, just set the country
+                            locationInput.setText(selectedCountry);
+                        }
+                    })
+                    .show();
+        });
+    }
+
+
 
     private void setupClickListeners() {
         profileImage.setOnClickListener(v -> openImagePicker());
@@ -86,12 +122,10 @@ public class EditProfileActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // Get data directly from document
                         String name = documentSnapshot.getString("name");
                         String location = documentSnapshot.getString("location");
                         String about = documentSnapshot.getString("about");
 
-                        // Set data to views, checking for null
                         if (name != null) displayNameInput.setText(name);
                         if (location != null) locationInput.setText(location);
                         if (about != null) aboutInput.setText(about);
@@ -117,17 +151,11 @@ public class EditProfileActivity extends AppCompatActivity {
         String about = aboutInput.getText() != null ?
                 aboutInput.getText().toString().trim() : "";
 
-        // Validate inputs
         if (displayName.isEmpty()) {
             displayNameInput.setError("Display name is required");
             return;
         }
 
-        // Create user profile data
-        UserProfile userProfile = new UserProfile(displayName, location, about);
-
-        // Save to Firebase
-        // Update only the specified fields
         db.collection("users").document(currentUserId)
                 .update("name", displayName, "location", location, "about", about)
                 .addOnSuccessListener(aVoid -> {
