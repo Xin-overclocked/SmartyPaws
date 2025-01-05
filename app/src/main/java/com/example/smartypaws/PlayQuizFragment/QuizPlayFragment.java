@@ -32,7 +32,7 @@ import java.util.List;
 
 public class QuizPlayFragment extends Fragment {
 
-    private TextView tvQn, tvProgress;
+    private TextView tvQn, tvProgress, tvQuizTitle;
     private ImageButton btnPrev, btnNext;
     private MaterialButton btnOption1, btnOption2, btnOption3, btnOption4;
 
@@ -73,6 +73,7 @@ public class QuizPlayFragment extends Fragment {
         btnOption4 = view.findViewById(R.id.btnOption4);
         progressBar = view.findViewById(R.id.progressBar);
         btns = new MaterialButton[]{btnOption1, btnOption2, btnOption3, btnOption4};
+        tvQuizTitle = view.findViewById(R.id.tvQuizTitle);
 
         db = FirebaseFirestore.getInstance();
         loadQuiz();
@@ -99,6 +100,7 @@ public class QuizPlayFragment extends Fragment {
                 .addOnSuccessListener(documentSnapshot -> {
                     quiz = documentSnapshot.toObject(Quiz.class);
                     if (quiz != null) {
+                        tvQuizTitle.setText(quiz.getTitle());
                         qnList = quiz.getQuestions();
                         noOfQn = Math.min(getNoOfQn(), qnList.size());
                         loadQn(noOfQn);
