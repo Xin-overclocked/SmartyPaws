@@ -6,6 +6,7 @@ import android.util.Patterns;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.smartypaws.databinding.ActivityLoginBinding;
@@ -23,12 +24,11 @@ import java.util.Objects;
 public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding activityLoginBinding;
-
-//    private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
     private TextView forgotPassword;
     private static final int RC_SIGN_IN = 9001;
+    private static final String TAG = "LoginActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +54,6 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-//        db = FirebaseFirestore.getInstance();
-
         activityLoginBinding.loginButton.setOnClickListener(v -> performLogin());
 
         forgotPassword = findViewById(R.id.forgotPassword);
@@ -63,10 +61,6 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
-
-//        activityLoginBinding.googleSignInButton.setOnClickListener(v -> {
-//            signInWithGoogle();
-//        });
     }
 
     private void signInWithGoogle() {
@@ -77,9 +71,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
+        if(currentUser != null && currentUser.isEmailVerified()){
             updateUI(currentUser);
         }
     }
@@ -95,54 +88,85 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             checkAccount(email, password);
         }
-
     }
 
     private void checkAccount(String email, String password) {
-//        db.collection("users")
-//                .whereEqualTo("email", email)
-//                .get()
-//                .addOnCompleteListener(task -> {
-//                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
-//                        QuerySnapshot querySnapshot = task.getResult();
-//                        boolean isPasswordCorrect = false;
-//
-//                        for (QueryDocumentSnapshot document : querySnapshot) {
-//                            String storedPassword = document.getString("password");
-//                            if (storedPassword != null && storedPassword.equals(password)) {
-//                                isPasswordCorrect = true;
-//                                break;
-//                            }
-//                        }
-//
-//                        if (isPasswordCorrect) {
-//                            Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-//                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                            startActivity(intent);
-//
-//                        } else {
-//                            Toast.makeText(LoginActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
-//                        }
-//                    } else {
-//                        Toast.makeText(LoginActivity.this, "Account not found", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                })
-//                .addOnFailureListener(e -> Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show());
-
-
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
                         FirebaseUser user = mAuth.getCurrentUser();
-                        updateUI(user);
+                        if (user != null) {
+                            if (user.isEmailVerified()) {
+                                updateEmailVerificationStatus(user.getUid());
+                                updateUI(user);
+                            } else {
+                                mAuth.signOut();
+                                showVerificationDialog(user);
+                            }
+                        }
                     } else {
-                        // If sign in fails, display a message to the user.
                         Toast.makeText(LoginActivity.this, "Authentication failed.",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void showVerificationDialog(FirebaseUser user) {
+        new AlertDialog.Builder(this)
+                .setTitle("Email Not Verified")
+                .setMessage("Please verify your email first. Would you like to resend the verification email?")
+                .setPositiveButton("Resend", (dialog, which) -> {
+                    // Get current user instance before sending verification email
+                    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (currentUser != null) {
+                        sendVerificationEmail(currentUser);
+                    } else {
+                        Toast.makeText(LoginActivity.this,
+                                "Please sign in again to resend verification email",
+                                Toast.LENGTH_LONG).show();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void sendVerificationEmail(FirebaseUser user) {
+        long authTimestamp = Objects.requireNonNull(user.getMetadata()).getLastSignInTimestamp();
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - authTimestamp > 30 * 60 * 1000) {
+            // re-authenticate
+            Toast.makeText(this, "Please sign in again to resend verification email",
+                    Toast.LENGTH_LONG).show();
+            mAuth.signOut();
+            return;
+        }
+
+        user.sendEmailVerification()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(LoginActivity.this,
+                                "New verification email sent. Please check your inbox.",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        String errorMessage = task.getException() != null ?
+                                task.getException().getMessage() :
+                                "Failed to send verification email.";
+                        Toast.makeText(LoginActivity.this, errorMessage,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void updateEmailVerificationStatus(String userId) {
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .update("emailVerified", true)
+                .addOnFailureListener(e ->
+                        Toast.makeText(LoginActivity.this,
+                                "Error updating verification status",
+                                Toast.LENGTH_SHORT).show());
     }
 
     private void updateUI(FirebaseUser user) {
@@ -153,6 +177,4 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }
     }
-
-
 }

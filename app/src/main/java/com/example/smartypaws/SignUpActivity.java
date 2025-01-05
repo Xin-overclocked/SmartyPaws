@@ -37,15 +37,12 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate the layout using Data Binding
         activitySignupBinding = ActivitySignupBinding.inflate(getLayoutInflater());
         setContentView(activitySignupBinding.getRoot());
 
-        // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -53,13 +50,10 @@ public class SignUpActivity extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Set up click listeners
         activitySignupBinding.loginLink.setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
         });
-
-//        activitySignupBinding.googleSignInButton.setOnClickListener(v -> signInWithGoogle());
 
         activitySignupBinding.signUpButton.setOnClickListener(v -> setupAction());
     }
@@ -84,14 +78,30 @@ public class SignUpActivity extends AppCompatActivity {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Sign up success, update UI with the signed-in user's information
                         Log.d(TAG, "createUserWithEmail:success");
                         FirebaseUser user = mAuth.getCurrentUser();
-                        saveUserToFirestore(user.getUid(), name, email);
+                        if (user != null) {
+                            sendVerificationEmail(user, name, email);
+                        }
                     } else {
-                        // If sign up fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
                         Toast.makeText(SignUpActivity.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void sendVerificationEmail(FirebaseUser user, String name, String email) {
+        user.sendEmailVerification()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        saveUserToFirestore(user.getUid(), name, email);
+                        Toast.makeText(SignUpActivity.this,
+                                "Verification email sent. Please check your inbox to verify your account.",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(SignUpActivity.this,
+                                "Failed to send verification email.",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -103,18 +113,23 @@ public class SignUpActivity extends AppCompatActivity {
         user.put("email", email);
         user.put("about", "This is a about");
         user.put("location", "Malaysia is here");
+        user.put("emailVerified", false);
 
         db.collection("users").document(userId)
                 .set(user)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(SignUpActivity.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
+                    mAuth.signOut();
+                    Toast.makeText(SignUpActivity.this,
+                            "Sign up successful. Please verify your email before logging in.",
+                            Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                     startActivity(intent);
                     finish();
                 })
-                .addOnFailureListener(e -> Toast.makeText(SignUpActivity.this, "Error saving user data", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(SignUpActivity.this,
+                        "Error saving user data",
+                        Toast.LENGTH_SHORT).show());
     }
-
     private void signInWithGoogle() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
