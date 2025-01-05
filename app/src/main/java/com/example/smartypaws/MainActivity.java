@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             // Reference buttons inside the dialog
             Button createFlashcard = dialog.findViewById(R.id.btn_create_flashcard);
             Button createQuiz = dialog.findViewById(R.id.btn_create_quiz);
+            Button createQuizFromFlashcard = dialog.findViewById(R.id.btn_create_quiz_flashcard);
 
             // Set click listeners for the dialog buttons
             createFlashcard.setOnClickListener(view -> {
@@ -137,6 +138,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), QuizEditActivity.class));
                 dialog.dismiss();
             });
+
+            createQuizFromFlashcard.setOnClickListener(view -> {
+                startActivity(new Intent(getApplicationContext(), FlashcardSelection.class));
+                dialog.dismiss();
+            });
+
 
             // Show the dialog
             dialog.show();

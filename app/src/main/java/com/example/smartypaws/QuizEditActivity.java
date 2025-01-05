@@ -95,12 +95,12 @@ public class QuizEditActivity extends AppCompatActivity {
         });
 
         // Setup create from flashcard button
-        findViewById(R.id.createFromFlashcardButton).setOnClickListener(v -> {
-            // Implement create quiz from flashcard functionality
-//            createQuizFromFlashcards();
-            Intent intent = new Intent(QuizEditActivity.this, FlashcardSelection.class);
-            startActivity(intent);
-        });
+//        findViewById(R.id.createFromFlashcardButton).setOnClickListener(v -> {
+//            // Implement create quiz from flashcard functionality
+////            createQuizFromFlashcards();
+//            Intent intent = new Intent(QuizEditActivity.this, FlashcardSelection.class);
+//            startActivity(intent);
+//        });
     }
 
     private void loadGeneratedQuizData(String generatedQuiz) {

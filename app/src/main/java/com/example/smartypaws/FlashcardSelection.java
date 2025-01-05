@@ -85,7 +85,7 @@ public class FlashcardSelection extends AppCompatActivity {
         });
 
         findViewById(R.id.backButton).setOnClickListener(v -> {
-            Intent intent = new Intent(this, QuizViewActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
         });

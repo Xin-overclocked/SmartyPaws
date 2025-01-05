@@ -21,15 +21,15 @@
             android:src="@drawable/ic_back"
             android:contentDescription="Back" />
 
-        <ImageButton
-            android:id="@+id/menuButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_more"
-            android:contentDescription="Menu" />
+<!--        <ImageButton-->
+<!--            android:id="@+id/menuButton"-->
+<!--            android:layout_width="30dp"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:src="@drawable/ic_more"-->
+<!--            android:contentDescription="Menu" />-->
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
