@@ -78,14 +78,14 @@
                 android:orientation="vertical"
                 android:layout_marginTop="16dp"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/createFromFlashcardButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Create from Flashcard"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/medium_purple"
-                android:layout_marginTop="16dp"/>
+<!--            <com.google.android.material.button.MaterialButton-->
+<!--                android:id="@+id/createFromFlashcardButton"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Create from Flashcard"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:backgroundTint="@color/medium_purple"-->
+<!--                android:layout_marginTop="16dp"/>-->
 
         </LinearLayout>
     </ScrollView>
