@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.ViewHolder> {
-    private List<FlashcardSet> flashcardSets;
+    private final List<FlashcardSet> flashcardSets;
     private int selectedPosition = RecyclerView.NO_POSITION;
 
     public FlashcardAdapter(List<FlashcardSet> flashcardSets) {

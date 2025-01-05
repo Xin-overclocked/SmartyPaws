@@ -38,7 +38,6 @@ public class AuthService {
                         }
                         listener.onFailure(errorMessage);
                     }
-                    ;
                 });
     }
     // loginuser

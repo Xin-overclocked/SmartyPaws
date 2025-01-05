@@ -39,7 +39,7 @@ public class FlashcardEditActivity extends AppCompatActivity {
     private EditText descriptionEditText;
     private String currentUserId;
     private HashMap<String, String> flashcardMap;
-    private HashMap<String, String> flashcardIds = new HashMap<>(); // Store flashcard IDs with their terms
+    private final HashMap<String, String> flashcardIds = new HashMap<>(); // Store flashcard IDs with their terms
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

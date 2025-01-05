@@ -187,11 +187,7 @@ public class QuizPlayFragment extends Fragment {
     private void checkAns(int selectedOptionIndex) {
         selectedBtnI[curQnIndex] = selectedOptionIndex;
 
-        if (curOptions.get(selectedOptionIndex).isCorrect()) {
-            scores[curQnIndex] = true;
-        } else {
-            scores[curQnIndex] = false;
-        }
+        scores[curQnIndex] = curOptions.get(selectedOptionIndex).isCorrect();
 
         setSelectedBtn();
     }

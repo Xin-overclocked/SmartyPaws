@@ -1,10 +1,10 @@
 package com.example.smartypaws;
 
 public class UserProfile {
-    private String name;
+    private final String name;
     private String email;
-    private String location;
-    private String about;
+    private final String location;
+    private final String about;
 
     public UserProfile(String displayName, String location, String about) {
         this.name = displayName;

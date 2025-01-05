@@ -12,7 +12,7 @@ import java.util.List;
 
 public class StudyItemAdapter extends RecyclerView.Adapter<StudyItemAdapter.ViewHolder> {
     private List<StudyItem> studyItems;
-    private OnItemClickListener listener;
+    private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
         void onItemClick(StudyItem item);

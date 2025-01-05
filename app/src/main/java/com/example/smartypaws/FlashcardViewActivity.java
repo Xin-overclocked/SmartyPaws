@@ -37,9 +37,9 @@ public class FlashcardViewActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
-    private HashMap<String, String> flashcardMap = new HashMap<>();
+    private final HashMap<String, String> flashcardMap = new HashMap<>();
     // Add a map to store flashcard IDs with their content
-    private HashMap<String, Map<String, String>> flashcardFullData = new HashMap<>();
+    private final HashMap<String, Map<String, String>> flashcardFullData = new HashMap<>();
 
     private TextView titleTextView;
     private TextView dateText;
