@@ -3,6 +3,7 @@ package com.example.smartypaws;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
 //    private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
+    private TextView forgotPassword;
     private static final int RC_SIGN_IN = 9001;
 
     @Override
@@ -55,6 +57,12 @@ public class LoginActivity extends AppCompatActivity {
 //        db = FirebaseFirestore.getInstance();
 
         activityLoginBinding.loginButton.setOnClickListener(v -> performLogin());
+
+        forgotPassword = findViewById(R.id.forgotPassword);
+        forgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
 
 //        activityLoginBinding.googleSignInButton.setOnClickListener(v -> {
 //            signInWithGoogle();
