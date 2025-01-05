@@ -3,7 +3,11 @@ package com.example.smartypaws;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -30,11 +34,14 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ProfileActivity extends AppCompatActivity {
 
     private BarChart barChart;
     private FloatingActionButton fab;
     private ImageButton settingButton;
+    private CircleImageView profileImage;
     private Button editButton;
 //    ActivityMainBinding binding;
     private FirebaseFirestore db;
@@ -78,6 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Initialize views
         profileName = findViewById(R.id.profile_name);
+        profileImage = findViewById(R.id.profileImage);
         location = findViewById(R.id.profile_location);
         about = findViewById(R.id.about_text);
         quizCount = findViewById(R.id.quiz_added);
@@ -116,10 +124,7 @@ public class ProfileActivity extends AppCompatActivity {
                 finish();
                 return true;
             }
-            if (item.getItemId() == R.id.nav_profile) {
-                return true;
-            }
-            return false;
+            return item.getItemId() == R.id.nav_profile;
         });
     }
 
@@ -255,6 +260,9 @@ public class ProfileActivity extends AppCompatActivity {
                         // Update UI with null checks
                         if (name != null) {
                             profileName.setText(name);
+                            setAvatar(name);
+                        }else{
+                            setAvatar(null);
                         }
                         if (userLocation != null) {
                             location.setText(userLocation);
@@ -343,5 +351,51 @@ public class ProfileActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
+    }
+
+    // Call this method to set the avatar based on the display name
+    private void setAvatar(String displayName) {
+        if (displayName == null || displayName.isEmpty()) {
+            profileImage.setImageResource(R.drawable.profile_placeholder); // Default placeholder
+            return;
+        }
+
+        // Get the first letter
+        String firstLetter = displayName.substring(0, 1).toUpperCase();
+
+        // Generate the avatar bitmap
+        Bitmap avatarBitmap = createBitmapWithLetter(firstLetter);
+
+        // Set the bitmap to the profileImage
+        profileImage.setImageBitmap(avatarBitmap);
+    }
+
+    private Bitmap createBitmapWithLetter(String letter) {
+        int size = 100; // Width and height of the avatar
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        // Draw the background and the letter
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+
+        // Draw background
+        paint.setColor(Color.parseColor("#553479"));
+        canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+
+        // Draw the letter
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(50);
+        paint.setTextAlign(Paint.Align.CENTER);
+
+        // Get text bounds to center the letter
+        Rect textBounds = new Rect();
+        paint.getTextBounds(letter, 0, 1, textBounds);
+        float x = size / 2;
+        float y = size / 2 - textBounds.exactCenterY();
+
+        canvas.drawText(letter, x, y, paint);
+
+        return bitmap;
     }
 }

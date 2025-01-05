@@ -3,12 +3,22 @@ package com.example.smartypaws;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.widget.ImageView;
+
+import androidx.core.content.ContextCompat;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,6 +39,8 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MainActivity extends AppCompatActivity {
     private ListenerRegistration flashcardsListener;
     private ListenerRegistration quizzesListener;
@@ -46,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private String currentUserId;
     private TextView profileName;
+    private CircleImageView profileImage;
     List<StudyItem> flashcardSetsList = new ArrayList<>();
     List<StudyItem> quizList = new ArrayList<>();
 
@@ -63,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Setup username
         profileName = findViewById(R.id.name);
+        // Setup Profile Picture
+        profileImage = findViewById(R.id.profileImage);
 
         // Set up RecyclerViews
         recentlyStudiedRecyclerView = findViewById(R.id.recentlyStudiedRecyclerView);
@@ -214,9 +229,10 @@ public class MainActivity extends AppCompatActivity {
                         String name = documentSnapshot.getString("name");
                         if (name != null) {
                             profileName.setText(name);
-
+                            setAvatar(name);
                         } else {
                             Log.e("MainActivity", "Name field is null or missing in Firestore");
+                            setAvatar(null);
                             profileName.setText("Unknown User");
                         }
                     } else {
@@ -335,5 +351,51 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(FontSizeContextWrapper.wrap(newBase));
+    }
+
+    // Call this method to set the avatar based on the display name
+    private void setAvatar(String displayName) {
+        if (displayName == null || displayName.isEmpty()) {
+            profileImage.setImageResource(R.drawable.profile_placeholder); // Default placeholder
+            return;
+        }
+
+        // Get the first letter
+        String firstLetter = displayName.substring(0, 1).toUpperCase();
+
+        // Generate the avatar bitmap
+        Bitmap avatarBitmap = createBitmapWithLetter(firstLetter);
+
+        // Set the bitmap to the profileImage
+        profileImage.setImageBitmap(avatarBitmap);
+    }
+
+    private Bitmap createBitmapWithLetter(String letter) {
+        int size = 100; // Width and height of the avatar
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        // Draw the background and the letter
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+
+        // Draw background
+        paint.setColor(Color.parseColor("#553479"));
+        canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+
+        // Draw the letter
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(50);
+        paint.setTextAlign(Paint.Align.CENTER);
+
+        // Get text bounds to center the letter
+        Rect textBounds = new Rect();
+        paint.getTextBounds(letter, 0, 1, textBounds);
+        float x = size / 2;
+        float y = size / 2 - textBounds.exactCenterY();
+
+        canvas.drawText(letter, x, y, paint);
+
+        return bitmap;
     }
 }

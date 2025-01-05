@@ -7,6 +7,11 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -106,7 +111,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
 
     private void setupClickListeners() {
-        profileImage.setOnClickListener(v -> openImagePicker());
+        //profileImage.setOnClickListener(v -> openImagePicker());
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
     }
@@ -126,7 +131,13 @@ public class EditProfileActivity extends AppCompatActivity {
                         String location = documentSnapshot.getString("location");
                         String about = documentSnapshot.getString("about");
 
-                        if (name != null) displayNameInput.setText(name);
+                        if (name != null) {
+                            displayNameInput.setText(name);
+                            setAvatar(name);
+                        }else{
+                            setAvatar(null);
+                        }
+
                         if (location != null) locationInput.setText(location);
                         if (about != null) aboutInput.setText(about);
                     } else {
@@ -169,13 +180,60 @@ public class EditProfileActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show());
     }
 
-    private void openImagePicker() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"),
-                PICK_IMAGE_REQUEST);
+//    private void openImagePicker() {
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"),
+//                PICK_IMAGE_REQUEST);
+//    }
+
+    // Call this method to set the avatar based on the display name
+    private void setAvatar(String displayName) {
+        if (displayName == null || displayName.isEmpty()) {
+            profileImage.setImageResource(R.drawable.profile_placeholder); // Default placeholder
+            return;
+        }
+
+        // Get the first letter
+        String firstLetter = displayName.substring(0, 1).toUpperCase();
+
+        // Generate the avatar bitmap
+        Bitmap avatarBitmap = createBitmapWithLetter(firstLetter);
+
+        // Set the bitmap to the profileImage
+        profileImage.setImageBitmap(avatarBitmap);
     }
+
+    private Bitmap createBitmapWithLetter(String letter) {
+        int size = 100; // Width and height of the avatar
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        // Draw the background and the letter
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+
+        // Draw background
+        paint.setColor(Color.parseColor("#553479"));
+        canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+
+        // Draw the letter
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(50);
+        paint.setTextAlign(Paint.Align.CENTER);
+
+        // Get text bounds to center the letter
+        Rect textBounds = new Rect();
+        paint.getTextBounds(letter, 0, 1, textBounds);
+        float x = size / 2;
+        float y = size / 2 - textBounds.exactCenterY();
+
+        canvas.drawText(letter, x, y, paint);
+
+        return bitmap;
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
